@@ -1,7 +1,7 @@
 /// <reference path="../GComponent.ts" />
 /// <reference path="../events/StateChangeEvent.ts" />
 
-namespace fgui.controller {
+namespace fgui {
 
     export class Controller extends PIXI.utils.EventEmitter {
 

@@ -2,7 +2,7 @@
 /// <reference path="./Controller.ts" />
 /// <reference path="../utils/XMLParser.ts" />
 
-namespace fgui.controller {
+namespace fgui {
     export class PlayTransitionAction extends Action {
 
         public transitionName: string;

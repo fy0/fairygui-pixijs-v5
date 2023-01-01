@@ -1,5 +1,5 @@
 
-namespace fgui.controller {
+namespace fgui {
 	export class ChangePageAction extends Action {
 
 		public objectId: string;

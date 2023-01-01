@@ -400,8 +400,8 @@ namespace fgui {
 
         public internalCreateObject(item: PackageItem, userClass: { new(): GObject; } = null): GObject {
             let g: GObject = item.type == PackageItemType.Component && userClass != null ? new userClass() : UIObjectFactory.newObject(item);
-            if (g == null)
-                return null;
+            if (g == null) 
+                return null; 
 
             UIPackage.$constructingObjects++;
             g.packageItem = item;

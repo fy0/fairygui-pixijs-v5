@@ -1,4 +1,4 @@
-namespace fgui.controller {
+namespace fgui {
     export class PageOption {
         private $controller: Controller;
         private $id: string;

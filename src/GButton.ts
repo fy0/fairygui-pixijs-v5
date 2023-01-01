@@ -5,7 +5,7 @@ namespace fgui {
     export class GButton extends GComponent implements IColorableTitle {
         protected $titleObject: GObject;
         protected $iconObject: GObject;
-        protected $relatedController: controller.Controller;
+        protected $relatedController: Controller;
 
         private $mode: ButtonMode;
         private $selected: boolean;
@@ -13,8 +13,8 @@ namespace fgui {
         private $selectedTitle: string;
         private $icon: string;
         private $selectedIcon: string;
-        private $pageOption: controller.PageOption;
-        private $buttonController: controller.Controller;
+        private $pageOption: PageOption;
+        private $buttonController: Controller;
         private $changeStateOnClick: boolean;
         private $linkedPopup: GObject;
         private $downEffect: number;
@@ -38,7 +38,7 @@ namespace fgui {
             this.$mode = ButtonMode.Common;
             this.$title = "";
             this.$icon = "";
-            this.$pageOption = new controller.PageOption();
+            this.$pageOption = new PageOption();
             this.$changeStateOnClick = true;
             this.$downEffect = 0;
             this.$downEffectValue = 0.8;
@@ -178,11 +178,11 @@ namespace fgui {
             }
         }
 
-        public get relatedController(): controller.Controller {
+        public get relatedController(): Controller {
             return this.$relatedController;
         }
 
-        public set relatedController(val: controller.Controller) {
+        public set relatedController(val: Controller) {
             if (val != this.$relatedController) {
                 this.$relatedController = val;
                 this.$pageOption.controller = val;
@@ -190,7 +190,7 @@ namespace fgui {
             }
         }
 
-        public get pageOption(): controller.PageOption {
+        public get pageOption(): PageOption {
             return this.$pageOption;
         }
 
@@ -255,7 +255,7 @@ namespace fgui {
             }
         }
 
-        public handleControllerChanged(c: controller.Controller): void {
+        public handleControllerChanged(c: Controller): void {
             super.handleControllerChanged(c);
 
             if (this.$relatedController == c)

@@ -315,7 +315,7 @@ declare namespace fgui {
         getGear(index: number | GearType): GearBase<GObject>;
         protected updateGear(index: GearType): void;
         updateGearFromRelations(index: GearType, dx: number, dy: number): void;
-        hasGearController(index: number, c: controller.Controller): boolean;
+        hasGearController(index: number, c: Controller): boolean;
         lockGearDisplay(): number;
         releaseGearDisplay(token: number): void;
         private checkGearVisible;
@@ -335,6 +335,9 @@ declare namespace fgui {
         icon: string;
         dispose(): void;
         click(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
+        onClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
+        setPosition(x: any, y: number): void;
+        onConstruct(): void;
         removeClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
         hasClick(fn?: PIXI.utils.EventEmitter.ListenerFn): boolean;
         on(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this;
@@ -354,7 +357,7 @@ declare namespace fgui {
         rootToLocal(ax?: number, ay?: number, resultPoint?: PIXI.Point): PIXI.Point;
         localToGlobalRect(ax?: number, ay?: number, aWidth?: number, aHeight?: number, resultRect?: PIXI.Rectangle): PIXI.Rectangle;
         globalToLocalRect(ax?: number, ay?: number, aWidth?: number, aHeight?: number, resultRect?: PIXI.Rectangle): PIXI.Rectangle;
-        handleControllerChanged(c: controller.Controller): void;
+        handleControllerChanged(c: Controller): void;
         protected switchDisplayObject(newObj: PIXI.DisplayObject): void;
         protected handleXYChanged(): void;
         protected handleSizeChanged(): void;
@@ -393,9 +396,9 @@ declare namespace fgui {
         protected $trackBounds: boolean;
         protected $boundsChanged: boolean;
         protected $children: GObject[];
-        protected $applyingController: controller.Controller;
+        protected $applyingController: Controller;
         $buildingDisplayList: boolean;
-        $controllers: controller.Controller[];
+        $controllers: Controller[];
         $transitions: Transition[];
         $rootContainer: UIContainer;
         $container: PIXI.Container;
@@ -423,15 +426,15 @@ declare namespace fgui {
         swapChildrenAt(index1: number, index2?: number): void;
         readonly numChildren: number;
         isAncestorOf(child: GObject): boolean;
-        addController(controller: controller.Controller): void;
-        getControllerAt(index: number): controller.Controller;
-        getController(name: string): controller.Controller;
-        removeController(c: controller.Controller): void;
-        readonly controllers: controller.Controller[];
+        addController(controller: Controller): void;
+        getControllerAt(index: number): Controller;
+        getController(name: string): Controller;
+        removeController(c: Controller): void;
+        readonly controllers: Controller[];
         childStateChanged(child: GObject): void;
-        applyController(c: controller.Controller): void;
+        applyController(c: Controller): void;
         applyAllControllers(): void;
-        adjustRadioGroupDepth(obj: GObject, c: controller.Controller): void;
+        adjustRadioGroupDepth(obj: GObject, c: Controller): void;
         getTransitionAt(index: number): Transition;
         getTransition(transName: string): Transition;
         isChildInView(child: GObject): boolean;
@@ -467,7 +470,7 @@ declare namespace fgui {
     class GButton extends GComponent implements IColorableTitle {
         protected $titleObject: GObject;
         protected $iconObject: GObject;
-        protected $relatedController: controller.Controller;
+        protected $relatedController: Controller;
         private $mode;
         private $selected;
         private $title;
@@ -500,15 +503,15 @@ declare namespace fgui {
         fontSize: number;
         selected: boolean;
         mode: ButtonMode;
-        relatedController: controller.Controller;
-        readonly pageOption: controller.PageOption;
+        relatedController: Controller;
+        readonly pageOption: PageOption;
         changeStateOnClick: boolean;
         linkedPopup: GObject;
         addStateListener(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): void;
         removeStateListener(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): void;
         fireClick(downEffect?: boolean): void;
         protected setState(val: string): void;
-        handleControllerChanged(c: controller.Controller): void;
+        handleControllerChanged(c: Controller): void;
         protected handleGrayedChanged(): void;
         protected constructFromXML(xml: utils.XmlNode): void;
         setupAfterAdd(xml: utils.XmlNode): void;
@@ -684,7 +687,7 @@ declare namespace fgui {
         defaultItem: string;
         autoResizeItem: boolean;
         selectionMode: ListSelectionMode;
-        selectionController: controller.Controller;
+        selectionController: Controller;
         readonly itemPool: utils.GObjectRecycler;
         getFromPool(url?: string): GObject;
         returnToPool(obj: GObject): void;
@@ -710,7 +713,7 @@ declare namespace fgui {
         resizeToFit(itemCount?: number, minSize?: number): void;
         getMaxItemWidth(): number;
         protected handleSizeChanged(): void;
-        handleControllerChanged(c: controller.Controller): void;
+        handleControllerChanged(c: Controller): void;
         private updateSelectionController;
         getSnappingPosition(xValue: number, yValue: number, resultPoint?: PIXI.Point): PIXI.Point;
         scrollToView(index: number, ani?: boolean, snapToFirst?: boolean): void;
@@ -1188,9 +1191,9 @@ declare namespace fgui {
         protected $tweenDelay: number;
         protected $lockToken: number;
         protected $owner: GObject & T;
-        protected $controller: controller.Controller;
+        protected $controller: Controller;
         constructor(owner: GObject & T);
-        controller: controller.Controller;
+        controller: Controller;
         tween: boolean;
         tweenDelay: number;
         tweenTime: number;
@@ -1502,7 +1505,7 @@ declare namespace fgui {
         currentPageY: number;
         readonly isBottomMost: boolean;
         readonly isRightMost: boolean;
-        pageController: controller.Controller;
+        pageController: Controller;
         readonly scrollingPosX: number;
         readonly scrollingPosY: number;
         scrollTop(ani?: boolean): void;
@@ -1518,7 +1521,7 @@ declare namespace fgui {
         lockHeader(size: number): void;
         lockFooter(size: number): void;
         onOwnerSizeChanged(): void;
-        handleControllerChanged(c: controller.Controller): void;
+        handleControllerChanged(c: Controller): void;
         private updatePageController;
         adjustMaskContainer(): void;
         setSize(width: number, height: number): void;
@@ -1731,6 +1734,7 @@ declare namespace PIXI.extras {
         stageScaleX: number;
         stageScaleY: number;
         constructor(renderer: PIXI.Renderer, options?: InteractionManagerOptions);
+        processInteractive(interactionEvent: InteractionEvent, displayObject: DisplayObject, func?: InteractionCallback, hitTest?: boolean): void;
         mapPositionToPoint(point: PIXI.Point, x: number, y: number): void;
     }
 }
@@ -1813,7 +1817,7 @@ declare namespace fgui {
         static bringWindowToFrontOnClick: boolean;
     }
 }
-declare namespace fgui.controller {
+declare namespace fgui {
     class Action {
         fromPage: string[];
         toPage: string[];
@@ -1824,7 +1828,7 @@ declare namespace fgui.controller {
         setup(xml: utils.XmlNode): void;
     }
 }
-declare namespace fgui.controller {
+declare namespace fgui {
     class ChangePageAction extends Action {
         objectId: string;
         controllerName: string;
@@ -1838,7 +1842,7 @@ declare namespace fgui {
         static CHANGED: string;
     }
 }
-declare namespace fgui.controller {
+declare namespace fgui {
     class Controller extends PIXI.utils.EventEmitter {
         private $name;
         private $selectedIndex;
@@ -1878,7 +1882,7 @@ declare namespace fgui.controller {
         setup(xml: utils.XmlNode): void;
     }
 }
-declare namespace fgui.controller {
+declare namespace fgui {
     class PageOption {
         private $controller;
         private $id;
@@ -1913,7 +1917,7 @@ declare namespace fgui.utils {
         static getXmlRoot(xml: XmlNode): XmlNode;
     }
 }
-declare namespace fgui.controller {
+declare namespace fgui {
     class PlayTransitionAction extends Action {
         transitionName: string;
         repeat: number;

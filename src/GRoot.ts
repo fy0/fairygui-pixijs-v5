@@ -62,13 +62,13 @@ namespace fgui {
             }
 
             this.$uiStage = new UIStage(app, stageOptions);
-            this.$uiStage.on(DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
+            // this.$uiStage.on(DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
             this.$uiStage.nativeStage.on(InteractiveEvents.Down, this.$stageDown, this);
             this.$uiStage.nativeStage.on(InteractiveEvents.Up, this.$stageUp, this);
             this.$uiStage.nativeStage.on(InteractiveEvents.Move, this.$stageMove, this);
             this.$uiStage.nativeStage.addChild(this.$displayObject);
 
-            this.$winResize(this.$uiStage);
+            // this.$winResize(this.$uiStage);
 
             if (!this.$modalLayer) {
                 this.$modalLayer = new GGraph();

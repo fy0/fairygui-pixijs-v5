@@ -602,7 +602,7 @@ namespace fgui {
                 this.$gears[index].updateFromRelations(dx, dy);
         }
 
-        public hasGearController(index:number, c:controller.Controller):boolean
+        public hasGearController(index:number, c:Controller):boolean
 		{
 			return this.$gears[index] && this.$gears[index].controller == c;
 		}
@@ -741,6 +741,19 @@ namespace fgui {
             return this.on(InteractiveEvents.Click, listener, thisObj);
         }
 
+        // 和其他平台sdk一致
+        public onClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this {
+            return this.on(InteractiveEvents.Click, listener, thisObj);
+        }
+
+        // 和其他平台sdk一致
+        public setPosition(x, y: number) {
+            this.setXY(x, y);
+        }
+
+        public onConstruct() {
+        }
+
         public removeClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this {
             return this.off(InteractiveEvents.Click, listener, thisObj);
         }
@@ -873,7 +886,7 @@ namespace fgui {
             return resultRect;
         }
 
-        public handleControllerChanged(c: controller.Controller): void {
+        public handleControllerChanged(c: Controller): void {
             this.$handlingController = true;
             for (let i: number = 0; i < GearType.Count; i++) {
                 let gear: GearBase<GObject> = this.$gears[i];

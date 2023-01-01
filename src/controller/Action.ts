@@ -1,5 +1,5 @@
 
-namespace fgui.controller {
+namespace fgui {
     export class Action {
 
         public fromPage: string[];

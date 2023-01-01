@@ -396,14 +396,14 @@ namespace fgui {
     let UIStageInst: UIStage[] = [];
     let resizeCheckTimer: number = NaN;
 
-    function resizeHandler(): void {
-        UIStageInst.forEach(stage => {
-            stage.updateScreenSize();
-        });
-    }
+    // function resizeHandler(): void {
+    //     UIStageInst.forEach(stage => {
+    //         stage.updateScreenSize();
+    //     });
+    // }
 
-    utils.DOMEventManager.inst.on('resize', function () {
-        clearTimeout(resizeCheckTimer);
-        resizeCheckTimer = window.setTimeout(resizeHandler, 300);
-    });
+    // utils.DOMEventManager.inst.on('resize', function () {
+    //     clearTimeout(resizeCheckTimer);
+    //     resizeCheckTimer = window.setTimeout(resizeHandler, 300);
+    // });
 }

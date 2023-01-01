@@ -10,6 +10,31 @@ namespace PIXI.extras {
             super(renderer, options);
         }
 
+        public processInteractive(interactionEvent: InteractionEvent, displayObject: DisplayObject, func?: InteractionCallback, hitTest?: boolean) {
+            const hit = this.search.findHit(interactionEvent, displayObject, func, hitTest);
+            const delayedEvents = this.delayedEvents;
+
+            if (!delayedEvents.length) {
+                return hit;
+            }
+            // Reset the propagation hint, because we start deeper in the tree again.
+            interactionEvent.stopPropagationHint = false;
+            const delayedLen = delayedEvents.length;
+            this.delayedEvents = [];
+
+            for (let i = 0; i < delayedLen; i++) {
+                const { displayObject, eventString, eventData } = delayedEvents[i];
+
+                // When we reach the object we wanted to stop propagating at,
+                // set the propagation hint.
+                if (eventData.stopsPropagatingAt === displayObject) {
+                    eventData.stopPropagationHint = true;
+                }
+                (this as any).dispatchEvent(displayObject, eventString, eventData);
+            }
+            return hit;
+        }
+
         public mapPositionToPoint(point: PIXI.Point, x: number, y: number): void {
 
             let rect: any = void 0;
@@ -49,7 +74,15 @@ namespace PIXI.extras {
 
         }
     }
-    PIXI.Renderer.registerPlugin("interaction", PIXI.extras.InteractionManager);
+
+    (PIXI as any).extensions.add({
+        name: 'interaction',
+        type: 'renderer-webgl-plugin', // PIXI.ExtensionType.RendererPlugin,
+        ref: PIXI.extras.InteractionManager,
+    });
+
+    // PIXI.Renderer.registerPlugin("interaction", PIXI.extras.InteractionManager);
+
     // PIXI.InteractionManager=PIXI.extras.InteractionManager;
     // //override
     // PIXI.CanvasRenderer.registerPlugin("interaction", PIXI.extras.InteractionManager);

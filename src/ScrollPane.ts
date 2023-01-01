@@ -56,7 +56,7 @@ namespace fgui {
         private $tweenStart: PIXI.Point;
         private $tweenChange: PIXI.Point;
 
-        private $pageController: controller.Controller;
+        private $pageController: Controller;
 
         private $hzScrollBar: GScrollBar;
         private $vtScrollBar: GScrollBar;
@@ -446,11 +446,11 @@ namespace fgui {
             return this.$xPos == this.$overlapSize.x || this.$overlapSize.x == 0;
         }
 
-        public get pageController(): controller.Controller {
+        public get pageController(): Controller {
             return this.$pageController;
         }
 
-        public set pageController(value: controller.Controller) {
+        public set pageController(value: Controller) {
             this.$pageController = value;
         }
 
@@ -644,7 +644,7 @@ namespace fgui {
         /**
          * @internal
          */
-        handleControllerChanged(c: controller.Controller): void {
+        handleControllerChanged(c: Controller): void {
             if (this.$pageController == c) {
                 if (this.$scrollType == ScrollType.Horizontal)
                     this.currentPageX = c.selectedIndex;
@@ -661,7 +661,7 @@ namespace fgui {
                 else
                     index = this.currentPageY;
                 if (index < this.$pageController.pageCount) {
-                    const c: controller.Controller = this.$pageController;
+                    const c: Controller = this.$pageController;
                     this.$pageController = null; //prevent from handleControllerChanged calling
                     c.selectedIndex = index;
                     this.$pageController = c;

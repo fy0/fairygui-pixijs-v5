@@ -11,12 +11,12 @@ namespace fgui {
         protected $trackBounds: boolean;
         protected $boundsChanged: boolean;
         protected $children: GObject[];
-        protected $applyingController: controller.Controller;
+        protected $applyingController: Controller;
 
         /**@internal */
         $buildingDisplayList: boolean;
         /**@internal */
-        $controllers: controller.Controller[];
+        $controllers: Controller[];
         /**@internal */
         $transitions: Transition[];
         /**@internal */
@@ -285,27 +285,27 @@ namespace fgui {
             return false;
         }
 
-        public addController(controller: controller.Controller): void {
+        public addController(controller: Controller): void {
             this.$controllers.push(controller);
             controller.$parent = this;
             this.applyController(controller);
         }
 
-        public getControllerAt(index: number): controller.Controller {
+        public getControllerAt(index: number): Controller {
             return this.$controllers[index];
         }
 
-        public getController(name: string): controller.Controller {
+        public getController(name: string): Controller {
             let cnt: number = this.$controllers.length;
             for (let i: number = 0; i < cnt; ++i) {
-                let c: controller.Controller = this.$controllers[i];
+                let c: Controller = this.$controllers[i];
                 if (c.name == name)
                     return c;
             }
             return null;
         }
 
-        public removeController(c: controller.Controller): void {
+        public removeController(c: Controller): void {
             let index: number = this.$controllers.indexOf(c);
             if (index == -1)
                 throw new Error("controller not exists");
@@ -318,7 +318,7 @@ namespace fgui {
             });
         }
 
-        public get controllers(): controller.Controller[] {
+        public get controllers(): Controller[] {
             return this.$controllers;
         }
 
@@ -358,7 +358,7 @@ namespace fgui {
             }
         }
 
-        public applyController(c: controller.Controller): void {
+        public applyController(c: Controller): void {
             this.$applyingController = c;
             this.$children.forEach(child => {
                 child.handleControllerChanged(c);
@@ -373,7 +373,7 @@ namespace fgui {
             }, this);
         }
 
-        public adjustRadioGroupDepth(obj: GObject, c: controller.Controller): void {
+        public adjustRadioGroupDepth(obj: GObject, c: Controller): void {
             let myIndex: number = -1, maxIndex: number = -1;
             this.$children.forEach((child, i) => {
                 if (child == obj) {
@@ -543,7 +543,7 @@ namespace fgui {
         }
 
         protected handleGrayedChanged(): void {
-            let c: controller.Controller = this.getController("grayed");
+            let c: Controller = this.getController("grayed");
             if (c != null)
                 c.selectedIndex = this.grayed ? 1 : 0;
             else
@@ -818,7 +818,7 @@ namespace fgui {
             let col: utils.XmlNode[] = xml.children;
             col.forEach(cxml => {
                 if (cxml.nodeName == "controller") {
-                    let c = new controller.Controller();
+                    let c = new Controller();
                     this.$controllers.push(c);
                     c.$parent = this;
                     c.setup(cxml);
@@ -885,6 +885,7 @@ namespace fgui {
 
             this.setBoundsChangedFlag();
             this.constructFromXML(xml);
+            this.onConstruct();
         }
 
         protected appendChildrenList(): void {
