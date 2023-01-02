@@ -1,7 +1,7 @@
 namespace fgui {
 
     export class GearXY extends GearBase<GObject> {
-        private $tweener: createjs.Tween;
+        private $tweener: TWEEN.Tween<PIXI.Point>;
 
         private $storage: { [key:string] : PIXI.Point };
         private $default: PIXI.Point;
@@ -42,7 +42,8 @@ namespace fgui {
                 if (this.$tweener) {
                     if (this.$tweenTarget.x === pt.x && this.$tweenTarget.y === pt.y)
                         return;
-                    this.$tweener.gotoAndStop(this.$tweener.duration);  //set to end
+                    // this.$tweener.gotoAndStop(this.$tweener.duration);  //set to end
+                    this.$tweener.end().stop();
                     this.$tweener = null;
                 }
                 if (this.$owner.x != pt.x || this.$owner.y != pt.y) {
@@ -62,10 +63,19 @@ namespace fgui {
                         this.$tweenValue = new PIXI.Point();
                     this.$tweenValue.x = this.$owner.x;
                     this.$tweenValue.y = this.$owner.y;
+
+                    this.$tweener = new TWEEN.Tween(this.$tweenValue)
+                        .onUpdate(vars.onChange)
+                        .delay(this.$tweenDelay * 1000)
+                        .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000)
+                        .easing(this.$easeType)
+                        .onComplete(this.tweenComplete)
+                        .start();
+
                     this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
                         .wait(this.$tweenDelay * 1000)
                         .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
+                        .call(this.tweenComplete, null, this) as any;
                 }
             }
             else {

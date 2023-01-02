@@ -332,37 +332,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
     fgui.ParseListChildrenRenderOrder = ParseListChildrenRenderOrder;
     var easeMap = {
-        "Linear": createjs.Ease.linear,
-        "Elastic.In": createjs.Ease.elasticIn,
-        "Elastic.Out": createjs.Ease.elasticOut,
-        "Elastic.InOut": createjs.Ease.elasticInOut,
-        "Quad.In": createjs.Ease.quadIn,
-        "Quad.Out": createjs.Ease.quadOut,
-        "Quad.InOut": createjs.Ease.quadInOut,
-        "Cube.In": createjs.Ease.cubicIn,
-        "Cube.Out": createjs.Ease.cubicOut,
-        "Cube.InOut": createjs.Ease.cubicInOut,
-        "Quart.In": createjs.Ease.quartIn,
-        "Quart.Out": createjs.Ease.quartOut,
-        "Quart.InOut": createjs.Ease.quartInOut,
-        "Quint.In": createjs.Ease.quintIn,
-        "Quint.Out": createjs.Ease.quintOut,
-        "Quint.InOut": createjs.Ease.quintInOut,
-        "Sine.In": createjs.Ease.sineIn,
-        "Sine.Out": createjs.Ease.sineOut,
-        "Sine.InOut": createjs.Ease.sineInOut,
-        "Bounce.In": createjs.Ease.bounceIn,
-        "Bounce.Out": createjs.Ease.bounceOut,
-        "Bounce.InOut": createjs.Ease.bounceInOut,
-        "Circ.In": createjs.Ease.circIn,
-        "Circ.Out": createjs.Ease.circOut,
-        "Circ.InOut": createjs.Ease.circInOut,
-        "Expo.In": createjs.Ease.quartIn,
-        "Expo.Out": createjs.Ease.quartOut,
-        "Expo.InOut": createjs.Ease.quartInOut,
-        "Back.In": createjs.Ease.backIn,
-        "Back.Out": createjs.Ease.backOut,
-        "Back.InOut": createjs.Ease.backInOut
+        "Linear": TWEEN.Easing.Linear.None,
+        "Elastic.In": TWEEN.Easing.Elastic.In,
+        "Elastic.Out": TWEEN.Easing.Elastic.Out,
+        "Elastic.InOut": TWEEN.Easing.Elastic.InOut,
+        "Quad.In": TWEEN.Easing.Quadratic.In,
+        "Quad.Out": TWEEN.Easing.Quadratic.Out,
+        "Quad.InOut": TWEEN.Easing.Quadratic.InOut,
+        "Cube.In": TWEEN.Easing.Cubic.In,
+        "Cube.Out": TWEEN.Easing.Cubic.Out,
+        "Cube.InOut": TWEEN.Easing.Cubic.InOut,
+        "Quart.In": TWEEN.Easing.Quartic.In,
+        "Quart.Out": TWEEN.Easing.Quartic.Out,
+        "Quart.InOut": TWEEN.Easing.Quartic.InOut,
+        "Quint.In": TWEEN.Easing.Quintic.In,
+        "Quint.Out": TWEEN.Easing.Quintic.Out,
+        "Quint.InOut": TWEEN.Easing.Quintic.InOut,
+        "Sine.In": TWEEN.Easing.Sinusoidal.In,
+        "Sine.Out": TWEEN.Easing.Sinusoidal.Out,
+        "Sine.InOut": TWEEN.Easing.Sinusoidal.InOut,
+        "Bounce.In": TWEEN.Easing.Bounce.In,
+        "Bounce.Out": TWEEN.Easing.Bounce.Out,
+        "Bounce.InOut": TWEEN.Easing.Bounce.InOut,
+        "Circ.In": TWEEN.Easing.Circular.In,
+        "Circ.Out": TWEEN.Easing.Circular.Out,
+        "Circ.InOut": TWEEN.Easing.Circular.InOut,
+        "Expo.In": TWEEN.Easing.Exponential.In,
+        "Expo.Out": TWEEN.Easing.Exponential.Out,
+        "Expo.InOut": TWEEN.Easing.Exponential.InOut,
+        "Back.In": TWEEN.Easing.Back.In,
+        "Back.Out": TWEEN.Easing.Back.Out,
+        "Back.InOut": TWEEN.Easing.Back.InOut
     };
     function ParseEaseType(name) {
         return easeMap[name] || easeMap["Linear"];
@@ -6598,7 +6598,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             },
             set: function (value) {
                 if (this.$tweener != null) {
-                    this.$tweener.paused = true;
+                    this.$tweener.pause();
                     this.$tweener = null;
                 }
                 if (this.$value != value) {
@@ -6612,12 +6612,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         GProgressBar.prototype.tweenValue = function (value, duration) {
             if (this.$value != value) {
                 if (this.$tweener) {
-                    this.$tweener.paused = true;
-                    this.$tweener.removeAllEventListeners();
-                    createjs.Tween.removeTweens(this);
+                    this.$tweener.stop();
+                    TWEEN.remove(this.$tweener);
                 }
                 this.$tweenValue = this.$value;
                 this.$value = value;
+                this.$tweener = new TWEEN.Tween(this)
+                    .onUpdate(fgui.utils.Binder.create(this.onUpdateTween, this))
+                    .to({ $tweenValue: value }, duration * 1000)
+                    .easing(GProgressBar.easeLinear)
+                    .start();
                 this.$tweener = createjs.Tween.get(this, { onChange: fgui.utils.Binder.create(this.onUpdateTween, this) })
                     .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear);
                 return this.$tweener;
@@ -6710,10 +6714,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GProgressBar.prototype.dispose = function () {
             if (this.$tweener) {
-                this.$tweener.paused = true;
-                this.$tweener.removeAllEventListeners();
+                this.$tweener.stop();
             }
-            createjs.Tween.removeTweens(this);
+            TWEEN.remove(this.$tweener);
             this.$tweener = null;
             _super.prototype.dispose.call(this);
         };
@@ -9251,7 +9254,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 if (this.$tweener) {
                     if (this.$tweenTarget.alpha === gv.alpha && this.$tweenTarget.rotation === gv.rotation)
                         return;
-                    this.$tweener.gotoAndStop(this.$tweener.duration);
+                    this.$tweener.end().stop();
                     this.$tweener = null;
                 }
                 var a_1 = gv.alpha != this.$owner.alpha;
@@ -9274,6 +9277,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         this.$tweenValue = new PIXI.Point();
                     this.$tweenValue.x = this.$owner.alpha;
                     this.$tweenValue.y = this.$owner.rotation;
+                    this.$tweener = new TWEEN.Tween(this.$tweenValue)
+                        .delay(this.$tweenDelay * 1000)
+                        .to({ x: gv.alpha, y: gv.rotation }, this.$tweenTime * 1000)
+                        .easing(this.$easeType)
+                        .onUpdate(vars.onChange)
+                        .onComplete(this.tweenComplete)
+                        .start();
                     this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
                         .wait(this.$tweenDelay * 1000)
                         .to({ x: gv.alpha, y: gv.rotation }, this.$tweenTime * 1000, this.$easeType)
@@ -9361,7 +9371,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 if (this.$tweener) {
                     if (this.$tweenTarget.width != gv.width || this.$tweenTarget.height != gv.height
                         || this.$tweenTarget.scaleX != gv.scaleX || this.$tweenTarget.scaleY != gv.scaleY) {
-                        this.$tweener.gotoAndStop(this.$tweener.duration);
+                        this.$tweener.end().stop();
                         this.$tweener = null;
                     }
                     else
@@ -9389,6 +9399,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     this.$tweenValue.height = this.$owner.height;
                     this.$tweenValue.scaleX = this.$owner.scaleX;
                     this.$tweenValue.scaleY = this.$owner.scaleY;
+                    this.$tweener = new TWEEN.Tween(this.$tweenValue)
+                        .delay(this.$tweenDelay * 1000)
+                        .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY }, this.$tweenTime * 1000)
+                        .easing(this.$easeType)
+                        .onUpdate(vars.onChange)
+                        .onComplete(this.tweenComplete)
+                        .start();
                     this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
                         .wait(this.$tweenDelay * 1000)
                         .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY }, this.$tweenTime * 1000, this.$easeType)
@@ -9521,7 +9538,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 if (this.$tweener) {
                     if (this.$tweenTarget.x === pt.x && this.$tweenTarget.y === pt.y)
                         return;
-                    this.$tweener.gotoAndStop(this.$tweener.duration);
+                    this.$tweener.end().stop();
                     this.$tweener = null;
                 }
                 if (this.$owner.x != pt.x || this.$owner.y != pt.y) {
@@ -9539,6 +9556,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         this.$tweenValue = new PIXI.Point();
                     this.$tweenValue.x = this.$owner.x;
                     this.$tweenValue.y = this.$owner.y;
+                    this.$tweener = new TWEEN.Tween(this.$tweenValue)
+                        .onUpdate(vars.onChange)
+                        .delay(this.$tweenDelay * 1000)
+                        .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000)
+                        .easing(this.$easeType)
+                        .onComplete(this.tweenComplete)
+                        .start();
                     this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
                         .wait(this.$tweenDelay * 1000)
                         .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
@@ -12277,6 +12301,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     if (startTime > 0) {
                         _this.$totalTasks++;
                         item.completed = false;
+                        item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () {
+                            _this.$delayCall(item);
+                        }).start();
                         item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall, [item], _this);
                     }
                     else
@@ -12292,6 +12319,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     else {
                         _this.$totalTasks++;
                         item.completed = false;
+                        item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () { return _this.$delayCall2(item); }).start();
                         item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall2, [item], _this);
                     }
                 }
@@ -12371,6 +12399,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         Transition.prototype.startTween = function (item) {
+            var _this = this;
             var toProps = new TransitionValue();
             this.prepareValue(item, toProps, this.$reversed);
             this.applyValue(item, item.value);
@@ -12384,6 +12413,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$totalTasks++;
             item.completed = false;
             this.prepareValue(item, toProps, this.$reversed);
+            item.tweener = new TWEEN.Tween(item.value).onUpdate(function () {
+                fgui.utils.Binder.create(_this.$tweenUpdate, _this, item);
+            }).onComplete(function () { return completeHandler(item.tweener); }).to(toProps, item.duration * 1000)
+                .easing(item.easeType)
+                .start();
             item.tweener = createjs.Tween.get(item.value, {
                 onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
             }).to(toProps, item.duration * 1000, item.easeType).call(completeHandler);
@@ -12416,6 +12450,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.checkAllComplete();
         };
         Transition.prototype.$tweenRepeatComplete = function (event, item) {
+            var _this = this;
             item.tweenTimes++;
             if (item.repeat == -1 || item.tweenTimes < item.repeat + 1) {
                 var toProps = new TransitionValue;
@@ -12430,6 +12465,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     reversed = this.$reversed;
                 this.prepareValue(item, toProps, reversed);
                 this.disposeTween(item);
+                item.tweener = new TWEEN.Tween(item.value).onUpdate(function () { return fgui.utils.Binder.create(_this.$tweenUpdate, _this, item); })
+                    .onComplete(function () { return _this.$tweenRepeatComplete(null, item); }).to(toProps, item.duration * 1000)
+                    .easing(item.easeType)
+                    .start();
                 item.tweener = createjs.Tween.get(item.value, {
                     onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
                 }).to(toProps, item.duration * 1000, item.easeType).call(this.$tweenRepeatComplete, [null, item], this);
@@ -12441,9 +12480,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (!item)
                 return;
             if (item.tweener) {
-                item.tweener.paused = true;
-                item.tweener.removeAllEventListeners();
-                createjs.Tween.removeTweens(item.value);
+                item.tweener.stop();
+                TWEEN.remove(item.tweener);
                 item.tweener = null;
             }
         };

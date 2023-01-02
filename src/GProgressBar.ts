@@ -17,7 +17,7 @@ namespace fgui {
         private $barStartX: number = 0;
         private $barStartY: number = 0;
 
-        private $tweener: createjs.Tween;
+        private $tweener: TWEEN.Tween<GProgressBar>;
         private $tweenValue: number = 0;
 
         private static easeLinear: (amount: number) => number = ParseEaseType("linear"); // createjs.Ease.getPowIn(1);
@@ -58,7 +58,8 @@ namespace fgui {
 
         public set value(value: number) {
             if (this.$tweener != null) {
-                this.$tweener.paused = true;
+                this.$tweener.pause();
+                // this.$tweener.paused = true;
                 this.$tweener = null;
             }
 
@@ -68,18 +69,26 @@ namespace fgui {
             }
         }
 
-        public tweenValue(value: number, duration: number): createjs.Tween {
+        public tweenValue(value: number, duration: number): TWEEN.Tween<GProgressBar> {
             if (this.$value != value) {
                 if (this.$tweener) {
-                    this.$tweener.paused = true;
-                    this.$tweener.removeAllEventListeners();
-                    createjs.Tween.removeTweens(this);
+                    this.$tweener.stop();
+                    TWEEN.remove(this.$tweener);
+                    // this.$tweener.paused = true;
+                    // this.$tweener.removeAllEventListeners();
+                    // createjs.Tween.removeTweens(this);
                 }
 
                 this.$tweenValue = this.$value;
                 this.$value = value;
+                this.$tweener = new TWEEN.Tween(this)
+                    .onUpdate(utils.Binder.create(this.onUpdateTween, this))
+                    .to({ $tweenValue: value }, duration * 1000)
+                    .easing(GProgressBar.easeLinear)
+                    .start();
+
                 this.$tweener = createjs.Tween.get(this, { onChange: utils.Binder.create(this.onUpdateTween, this) })
-                    .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear);
+                    .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear) as any;
                 return this.$tweener;
             }
             else
@@ -188,10 +197,12 @@ namespace fgui {
 
         public dispose(): void {
             if (this.$tweener) {
-                this.$tweener.paused = true;
-                this.$tweener.removeAllEventListeners();
+                // this.$tweener.paused = true;
+                // this.$tweener.removeAllEventListeners();
+                this.$tweener.stop();
             }
-            createjs.Tween.removeTweens(this);
+            // createjs.Tween.removeTweens(this);
+            TWEEN.remove(this.$tweener);
             this.$tweener = null;
             super.dispose();
         }

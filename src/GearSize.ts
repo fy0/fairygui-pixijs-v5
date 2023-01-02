@@ -2,7 +2,7 @@ namespace fgui {
 
     export class GearSize extends GearBase<GObject> {
 
-        private $tweener: createjs.Tween;
+        private $tweener: TWEEN.Tween<GearSizeValue>;
 
         private $storage: { [key: string]: GearSizeValue };
         private $default: GearSizeValue;
@@ -48,7 +48,8 @@ namespace fgui {
                 if (this.$tweener) {
                     if (this.$tweenTarget.width != gv.width || this.$tweenTarget.height != gv.height
                         || this.$tweenTarget.scaleX != gv.scaleX || this.$tweenTarget.scaleY != gv.scaleY) {
-                        this.$tweener.gotoAndStop(this.$tweener.duration);  //set to end
+                        // this.$tweener.gotoAndStop(this.$tweener.duration);  //set to end
+                        this.$tweener.end().stop();
                         this.$tweener = null;
                     }
                     else
@@ -73,17 +74,27 @@ namespace fgui {
                             this.$owner.$gearLocked = false;
                         }
                     };
+
                     if (this.$tweenValue == null)
                         this.$tweenValue = new GearSizeValue();
                     this.$tweenValue.width = this.$owner.width;
                     this.$tweenValue.height = this.$owner.height;
                     this.$tweenValue.scaleX = this.$owner.scaleX;
                     this.$tweenValue.scaleY = this.$owner.scaleY;
+                    // new Tween(this.$tweenValue)
+                    this.$tweener = new TWEEN.Tween(this.$tweenValue)
+                        .delay(this.$tweenDelay * 1000)
+                        .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY }, this.$tweenTime * 1000)
+                        .easing(this.$easeType)
+                        .onUpdate(vars.onChange)
+                        .onComplete(this.tweenComplete)
+                        .start();
+
                     this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
                         .wait(this.$tweenDelay * 1000)
                         .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY },
                         this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
+                        .call(this.tweenComplete, null, this) as any;
                 }
             }
             else {

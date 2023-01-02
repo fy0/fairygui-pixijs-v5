@@ -861,7 +861,7 @@ declare namespace fgui {
         titleType: ProgressTitleType;
         max: number;
         value: number;
-        tweenValue(value: number, duration: number): createjs.Tween;
+        tweenValue(value: number, duration: number): TWEEN.Tween<GProgressBar>;
         private onUpdateTween;
         update(val: number): void;
         protected constructFromXML(xml: utils.XmlNode): void;
@@ -1656,7 +1656,7 @@ declare namespace fgui {
         hook2: () => void;
         hook2Obj: any;
         tweenTimes: number;
-        tweener: createjs.Tween;
+        tweener: TWEEN.Tween<TransitionValue>;
         completed: boolean;
         target: GObject;
         filterCreated: boolean;

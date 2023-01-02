@@ -13,14 +13,17 @@
         ],
         "strict": false,
         "strictNullChecks": false,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "typeRoots": [
+          "src/types"
+        ]
     },
     "include": [
         "src",
         "typings"
     ],
     "exclude": [
-        "node_modules",
+        "node_modules/**",
         "demo"
     ]
 }

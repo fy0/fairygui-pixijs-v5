@@ -125,6 +125,8 @@ namespace fgui {
         }
 
         public tickTween():void {
+            // TWEEN.update();
+            // TWEEN.update(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
             createjs.Tween.tick(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
         }
 
