@@ -412,7 +412,7 @@ namespace fgui {
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(() => {
                             this.$delayCall(item);
                         }).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(this.$delayCall, [item], this) as any;
+                        // item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(this.$delayCall, [item], this) as any;
                     }
                     else
                         this.startTween(item);
@@ -429,7 +429,7 @@ namespace fgui {
                         item.completed = false;
 
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(() => this.$delayCall2(item)).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(this.$delayCall2, [item], this) as any;
+                        // item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(this.$delayCall2, [item], this) as any;
                     }
                 }
             }, this);
@@ -535,15 +535,19 @@ namespace fgui {
 
             this.prepareValue(item, toProps, this.$reversed);
             
-            item.tweener = new TWEEN.Tween(item.value).onUpdate(() => {
-                utils.Binder.create(this.$tweenUpdate, this, item);
-            }).onComplete(() => completeHandler(item.tweener)).to(toProps, item.duration * 1000)
+            console.log('???', item)
+            const onUpdate = utils.Binder.create(this.$tweenUpdate, this, item);
+            item.tweener = new TWEEN.Tween(item.value)
+            .onUpdate(() => {
+                onUpdate(null); // null是为了填充ev
+            }).to(toProps, item.duration * 1000)
+            .onComplete(() => completeHandler(item.tweener))
             .easing(item.easeType)
             .start();
 
-            item.tweener = createjs.Tween.get(item.value, {
-                onChange: utils.Binder.create(this.$tweenUpdate, this, item)
-            }).to(toProps, item.duration * 1000, item.easeType).call(completeHandler) as any;
+            // item.tweener = createjs.Tween.get(item.value, {
+            //     onChange: utils.Binder.create(this.$tweenUpdate, this, item)
+            // }).to(toProps, item.duration * 1000, item.easeType).call(completeHandler) as any;
 
             if (item.hook != null)
                 item.hook.call(item.hookObj);
@@ -596,15 +600,21 @@ namespace fgui {
                     reversed = this.$reversed;
                 this.prepareValue(item, toProps, reversed);
                 this.disposeTween(item);
-                
-                item.tweener = new TWEEN.Tween(item.value).onUpdate(() => utils.Binder.create(this.$tweenUpdate, this, item))
-                .onComplete(() => this.$tweenRepeatComplete(null, item)).to(toProps, item.duration * 1000)
+
+                // console.log('?? repeat', item, Date.now() / 1000);
+                const onUpdate = utils.Binder.create(this.$tweenUpdate, this, item);
+                item.tweener = new TWEEN.Tween(item.value).onUpdate(() => {
+                    onUpdate(null);
+                })
+                .to(toProps, item.duration * 1000)
                 .easing(item.easeType)
+                .delay(0)
+                .onComplete(() => { this.$tweenRepeatComplete(null, item) })
                 .start();
 
-                item.tweener = createjs.Tween.get(item.value, {
-                    onChange: utils.Binder.create(this.$tweenUpdate, this, item)
-                }).to(toProps, item.duration * 1000, item.easeType).call(this.$tweenRepeatComplete, [null, item], this) as any;
+                // item.tweener = createjs.Tween.get(item.value, {
+                //     onChange: utils.Binder.create(this.$tweenUpdate, this, item)
+                // }).to(toProps, item.duration * 1000, item.easeType).call(this.$tweenRepeatComplete, [null, item], this) as any;
             }
             else
                 this.$tweenComplete(null, item);

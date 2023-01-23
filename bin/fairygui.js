@@ -6622,8 +6622,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     .to({ $tweenValue: value }, duration * 1000)
                     .easing(GProgressBar.easeLinear)
                     .start();
-                this.$tweener = createjs.Tween.get(this, { onChange: fgui.utils.Binder.create(this.onUpdateTween, this) })
-                    .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear);
                 return this.$tweener;
             }
             else
@@ -7668,7 +7666,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             configurable: true
         });
         GRoot.prototype.attachTo = function (app, stageOptions) {
-            createjs.Ticker = null;
             fgui.GTimer.inst.setTicker(PIXI.Ticker.shared);
             if (this.$uiStage) {
                 this.$uiStage.off(fgui.DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
@@ -8759,11 +8756,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 (function (fgui) {
     var GTimer = (function () {
         function GTimer() {
+            var _this = this;
             this.$enumIdx = 0;
             this.$enumCount = 0;
             this.$curTime = Date.now();
+            this.$startedTime = 0;
             this.$items = [];
             this.$itemPool = [];
+            if (TWEEN.setupNow) {
+                TWEEN.setupNow(function () { return _this.$startedTime; });
+            }
         }
         GTimer.prototype.getItem = function () {
             if (this.$itemPool.length)
@@ -8863,7 +8865,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         GTimer.prototype.tickTween = function () {
-            createjs.Tween.tick(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
+            this.$startedTime += this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS;
+            TWEEN.update(this.$startedTime, !this.$ticker.started);
         };
         GTimer.prototype.setTicker = function (ticker) {
             if (this.$ticker) {
@@ -9284,10 +9287,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .onUpdate(vars.onChange)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ x: gv.alpha, y: gv.rotation }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -9406,10 +9405,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .onUpdate(vars.onChange)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -9563,10 +9558,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .easing(this.$easeType)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -12304,7 +12295,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () {
                             _this.$delayCall(item);
                         }).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall, [item], _this);
                     }
                     else
                         _this.startTween(item);
@@ -12320,7 +12310,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         _this.$totalTasks++;
                         item.completed = false;
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () { return _this.$delayCall2(item); }).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall2, [item], _this);
                     }
                 }
             }, this);
@@ -12399,7 +12388,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         Transition.prototype.startTween = function (item) {
-            var _this = this;
             var toProps = new TransitionValue();
             this.prepareValue(item, toProps, this.$reversed);
             this.applyValue(item, item.value);
@@ -12413,14 +12401,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$totalTasks++;
             item.completed = false;
             this.prepareValue(item, toProps, this.$reversed);
-            item.tweener = new TWEEN.Tween(item.value).onUpdate(function () {
-                fgui.utils.Binder.create(_this.$tweenUpdate, _this, item);
-            }).onComplete(function () { return completeHandler(item.tweener); }).to(toProps, item.duration * 1000)
+            console.log('???', item);
+            var onUpdate = fgui.utils.Binder.create(this.$tweenUpdate, this, item);
+            item.tweener = new TWEEN.Tween(item.value)
+                .onUpdate(function () {
+                onUpdate(null);
+            }).to(toProps, item.duration * 1000)
+                .onComplete(function () { return completeHandler(item.tweener); })
                 .easing(item.easeType)
                 .start();
-            item.tweener = createjs.Tween.get(item.value, {
-                onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
-            }).to(toProps, item.duration * 1000, item.easeType).call(completeHandler);
             if (item.hook != null)
                 item.hook.call(item.hookObj);
         };
@@ -12465,13 +12454,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     reversed = this.$reversed;
                 this.prepareValue(item, toProps, reversed);
                 this.disposeTween(item);
-                item.tweener = new TWEEN.Tween(item.value).onUpdate(function () { return fgui.utils.Binder.create(_this.$tweenUpdate, _this, item); })
-                    .onComplete(function () { return _this.$tweenRepeatComplete(null, item); }).to(toProps, item.duration * 1000)
+                var onUpdate_1 = fgui.utils.Binder.create(this.$tweenUpdate, this, item);
+                item.tweener = new TWEEN.Tween(item.value).onUpdate(function () {
+                    onUpdate_1(null);
+                })
+                    .to(toProps, item.duration * 1000)
                     .easing(item.easeType)
+                    .delay(0)
+                    .onComplete(function () { _this.$tweenRepeatComplete(null, item); })
                     .start();
-                item.tweener = createjs.Tween.get(item.value, {
-                    onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
-                }).to(toProps, item.duration * 1000, item.easeType).call(this.$tweenRepeatComplete, [null, item], this);
             }
             else
                 this.$tweenComplete(null, item);

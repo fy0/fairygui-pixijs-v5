@@ -72,10 +72,10 @@ namespace fgui {
                         .onComplete(this.tweenComplete)
                         .start();
 
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this) as any;
+                    // this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
+                    //     .wait(this.$tweenDelay * 1000)
+                    //     .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
+                    //     .call(this.tweenComplete, null, this) as any;
                 }
             }
             else {

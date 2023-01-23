@@ -15,6 +15,11 @@ namespace fgui {
         public constructor() {
             this.$items = [];
             this.$itemPool = [];
+
+            // 这里必须使用定制的tween.js并加上这个函数
+            if ((TWEEN as any).setupNow) {
+                (TWEEN as any).setupNow(() => this.$startedTime);
+            }
         }
 
         private getItem(): TimerItem {
@@ -124,10 +129,13 @@ namespace fgui {
             }
         }
 
+        private $startedTime = 0;
         public tickTween():void {
-            // TWEEN.update();
-            // TWEEN.update(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
-            createjs.Tween.tick(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
+            // Note: GTimer is instance
+            this.$startedTime += this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS;
+            TWEEN.update(this.$startedTime, !this.$ticker.started);
+            // console.log('?? tick', performance.now().toFixed(0), this._startedTime.toFixed(0), (performance.now() - this._startedTime).toFixed(0));
+            // createjs.Tween.tick(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
         }
 
         public setTicker(ticker:PIXI.Ticker):void {

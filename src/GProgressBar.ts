@@ -87,8 +87,8 @@ namespace fgui {
                     .easing(GProgressBar.easeLinear)
                     .start();
 
-                this.$tweener = createjs.Tween.get(this, { onChange: utils.Binder.create(this.onUpdateTween, this) })
-                    .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear) as any;
+                // this.$tweener = createjs.Tween.get(this, { onChange: utils.Binder.create(this.onUpdateTween, this) })
+                //     .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear) as any;
                 return this.$tweener;
             }
             else

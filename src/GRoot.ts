@@ -49,7 +49,7 @@ namespace fgui {
          */
         public attachTo(app: PIXI.Application, stageOptions?: UIStageOptions): void {
 
-            createjs.Ticker = null;   //no need this one
+            // createjs.Ticker = null;   //no need this one
             GTimer.inst.setTicker(PIXI.Ticker.shared);
             
             if (this.$uiStage) {

@@ -1178,6 +1178,7 @@ declare namespace fgui {
         readonly ticker: PIXI.Ticker;
         readonly curTime: number;
         advance(): void;
+        private $startedTime;
         tickTween(): void;
         setTicker(ticker: PIXI.Ticker): void;
     }
