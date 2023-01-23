@@ -535,7 +535,6 @@ namespace fgui {
 
             this.prepareValue(item, toProps, this.$reversed);
             
-            console.log('???', item)
             const onUpdate = utils.Binder.create(this.$tweenUpdate, this, item);
             item.tweener = new TWEEN.Tween(item.value)
             .onUpdate(() => {
