@@ -9,7 +9,7 @@ gulp.task('build.js', () => {
     return tsProject.src()
         .pipe(tsProject())
         .js.pipe(inject.replace('var fgui;', ''))
-        .pipe(inject.prepend('window.fgui = {};\nwindow.fairygui = window.fgui;\n'))
+        .pipe(inject.prepend('window.fgui = {};\nwindow.fairygui = window.fgui;\nfgui = {};\nPIXI = PIXI || globalThis.PIXI;'))
         .pipe(inject.replace('var __extends =', 'window.__extends ='))
         .pipe(minify({ ext: { min: ".min.js" } }))
         .pipe(gulp.dest('./bin'));

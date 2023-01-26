@@ -36,6 +36,8 @@ namespace PIXI.extras {
         }
 
         public mapPositionToPoint(point: PIXI.Point, x: number, y: number): void {
+            point.set(x, y);
+            if (!(globalThis as any).wx) return;
 
             let rect: any = void 0;
             let dom: any = this.interactionDOMElement;

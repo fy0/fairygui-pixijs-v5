@@ -1,6 +1,7 @@
 window.fgui = {};
 window.fairygui = window.fgui;
-window.__extends = (this && this.__extends) || (function () {
+fgui = {};
+PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
@@ -12401,7 +12402,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$totalTasks++;
             item.completed = false;
             this.prepareValue(item, toProps, this.$reversed);
-            console.log('???', item);
             var onUpdate = fgui.utils.Binder.create(this.$tweenUpdate, this, item);
             item.tweener = new TWEEN.Tween(item.value)
                 .onUpdate(function () {
@@ -13175,6 +13175,9 @@ var PIXI;
                 return hit;
             };
             InteractionManager.prototype.mapPositionToPoint = function (point, x, y) {
+                point.set(x, y);
+                if (!globalThis.wx)
+                    return;
                 var rect = void 0;
                 var dom = this.interactionDOMElement;
                 if (!dom.parentElement) {
@@ -16344,7 +16347,7 @@ var PIXI;
                 buf = fgui.utils.AssetLoader.resourcesPool[this.$resKey + "_fui"];
             if (!buf)
                 throw new Error("Resource '" + this.$resKey + "' not found, please make sure that you use \"new fgui.utils.AssetLoader\" to load resources instead of \" PIXI.loaders.Loader\".");
-            if (!buf.data || !(buf.data instanceof ArrayBuffer))
+            if (!buf.data || !(buf.data instanceof ArrayBuffer || buf.data instanceof Uint8Array))
                 throw new Error("Resource '" + this.$resKey + "' is not a proper binary resource, please load it as binary format by calling yourLoader.add(name, url, { loadType:PIXI.loaders.Resource.LOAD_TYPE.XHR, xhrType: PIXI.loaders.Resource.XHR_RESPONSE_TYPE.BUFFER })");
             this.decompressPackage(buf.data);
             var str = this.getResDescriptor("sprites.bytes");
@@ -16423,8 +16426,7 @@ var PIXI;
         };
         UIPackage.prototype.decompressPackage = function (buf) {
             this.$resData = {};
-            var inflater = new Zlib.RawInflate(buf);
-            var data = inflater.decompress();
+            var data = fflate.inflateSync(new Uint8Array(buf));
             var source = fgui.utils.RawByte.decodeUTF8(data);
             var curr = 0;
             var fn;

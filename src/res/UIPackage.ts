@@ -218,7 +218,7 @@ namespace fgui {
             if (!buf)
                 throw new Error(`Resource '${this.$resKey}' not found, please make sure that you use "new fgui.utils.AssetLoader" to load resources instead of " PIXI.loaders.Loader".`);
 
-            if (!buf.data || !(buf.data instanceof ArrayBuffer))
+            if (!buf.data || !(buf.data instanceof ArrayBuffer || (buf as any).data instanceof Uint8Array))
                 throw new Error(`Resource '${this.$resKey}' is not a proper binary resource, please load it as binary format by calling yourLoader.add(name, url, { loadType:PIXI.loaders.Resource.LOAD_TYPE.XHR, xhrType: PIXI.loaders.Resource.XHR_RESPONSE_TYPE.BUFFER })`);
 
             this.decompressPackage(buf.data);
@@ -321,8 +321,9 @@ namespace fgui {
         private decompressPackage(buf: ArrayBuffer): void {
             this.$resData = {};
 
-            let inflater: Zlib.RawInflate = new Zlib.RawInflate(buf);
-            let data: Uint8Array = inflater.decompress();
+            // let inflater: Zlib.RawInflate = new Zlib.RawInflate(buf);
+            // let data: Uint8Array = inflater.decompress();
+            var data = fflate.inflateSync(new Uint8Array(buf));
             let source: string = utils.RawByte.decodeUTF8(data);
             let curr: number = 0;
             let fn: string;
