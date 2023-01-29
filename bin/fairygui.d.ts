@@ -2562,7 +2562,4 @@ declare namespace fgui.utils {
         parseStyle(text: string): TextBlock[];
     }
 }
-declare module fflate {
-    function inflateSync(data: Uint8Array, out?: Uint8Array): Uint8Array;
-}
 import fairygui = fgui;

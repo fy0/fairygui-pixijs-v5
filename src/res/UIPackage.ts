@@ -1,4 +1,360 @@
+
 namespace fgui {
+    const fflate = (function () {
+        // ../node_modules/fflate/esm/browser.js
+        var u8 = Uint8Array;
+        var u16 = Uint16Array;
+        var u32 = Uint32Array;
+    
+        // fixed length extra bits
+        const fleb = new u8([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, /* unused */ 0, 0, /* impossible */ 0]);
+    
+        // fixed distance extra bits
+        // see fleb note
+        const fdeb = new u8([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, /* unused */ 0, 0]);
+    
+        var clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+        var freb = function (eb, start) {
+            var b = new u16(31);
+            for (var i = 0; i < 31; ++i) {
+                b[i] = start += 1 << eb[i - 1];
+            }
+            var r = new u32(b[30]);
+            for (var i = 1; i < 30; ++i) {
+                for (var j = b[i]; j < b[i + 1]; ++j) {
+                    r[j] = j - b[i] << 5 | i;
+                }
+            }
+            return [b, r];
+        };
+        var _a = freb(fleb, 2);
+        var fl = _a[0];
+        var revfl = _a[1];
+        fl[28] = 258, revfl[258] = 28;
+        var _b = freb(fdeb, 0);
+        var fd = _b[0];
+        var revfd = _b[1];
+        var rev = new u16(32768);
+        for (i = 0; i < 32768; ++i) {
+            x = (i & 43690) >>> 1 | (i & 21845) << 1;
+            x = (x & 52428) >>> 2 | (x & 13107) << 2;
+            x = (x & 61680) >>> 4 | (x & 3855) << 4;
+            rev[i] = ((x & 65280) >>> 8 | (x & 255) << 8) >>> 1;
+        }
+        var x;
+        var i;
+        var hMap = function (cd, mb, r) {
+            var s = cd.length;
+            var i = 0;
+            var l = new u16(mb);
+            for (; i < s; ++i) {
+                if (cd[i])
+                    ++l[cd[i] - 1];
+            }
+            var le = new u16(mb);
+            for (i = 0; i < mb; ++i) {
+                le[i] = le[i - 1] + l[i - 1] << 1;
+            }
+            var co;
+            if (r) {
+                co = new u16(1 << mb);
+                var rvb = 15 - mb;
+                for (i = 0; i < s; ++i) {
+                    if (cd[i]) {
+                        var sv = i << 4 | cd[i];
+                        var r_1 = mb - cd[i];
+                        var v = le[cd[i] - 1]++ << r_1;
+                        for (var m = v | (1 << r_1) - 1; v <= m; ++v) {
+                            co[rev[v] >>> rvb] = sv;
+                        }
+                    }
+                }
+            } else {
+                co = new u16(s);
+                for (i = 0; i < s; ++i) {
+                    if (cd[i]) {
+                        co[i] = rev[le[cd[i] - 1]++] >>> 15 - cd[i];
+                    }
+                }
+            }
+            return co;
+        };
+        var flt = new u8(288);
+        for (i = 0; i < 144; ++i)
+            flt[i] = 8;
+        var i;
+        for (i = 144; i < 256; ++i)
+            flt[i] = 9;
+        var i;
+        for (i = 256; i < 280; ++i)
+            flt[i] = 7;
+        var i;
+        for (i = 280; i < 288; ++i)
+            flt[i] = 8;
+        var i;
+        var fdt = new u8(32);
+        for (i = 0; i < 32; ++i)
+            fdt[i] = 5;
+        var i;
+        var flrm = /* @__PURE__ */ hMap(flt, 9, 1);
+        var fdrm = /* @__PURE__ */ hMap(fdt, 5, 1);
+        var max = function (a) {
+            var m = a[0];
+            for (var i = 1; i < a.length; ++i) {
+                if (a[i] > m)
+                    m = a[i];
+            }
+            return m;
+        };
+        var bits = function (d, p, m) {
+            var o = p / 8 | 0;
+            return (d[o] | d[o + 1] << 8) >> (p & 7) & m;
+        };
+        var bits16 = function (d, p) {
+            var o = p / 8 | 0;
+            return (d[o] | d[o + 1] << 8 | d[o + 2] << 16) >> (p & 7);
+        };
+        var shft = function (p) {
+            return (p + 7) / 8 | 0;
+        };
+        var slc = function (v, s, e) {
+            if (s == null || s < 0)
+                s = 0;
+            if (e == null || e > v.length)
+                e = v.length;
+            var n = new (v.BYTES_PER_ELEMENT == 2 ? u16 : v.BYTES_PER_ELEMENT == 4 ? u32 : u8)(e - s);
+            n.set(v.subarray(s, e));
+            return n;
+        };
+        var ec = [
+            "unexpected EOF",
+            "invalid block type",
+            "invalid length/literal",
+            "invalid distance",
+            "stream finished",
+            "no stream handler",
+            ,
+            "no callback",
+            "invalid UTF-8 data",
+            "extra field too long",
+            "date not in range 1980-2099",
+            "filename too long",
+            "stream finishing",
+            "invalid zip data"
+            // determined by unknown compression method
+        ];
+    
+        /**
+         * An error generated within this library
+         */
+        interface FlateError extends Error {
+            /**
+             * The code associated with this error
+             */
+            code: number;
+        };
+        // inflate state
+        type InflateState = {
+            // lmap
+            l?: Uint16Array;
+            // dmap
+            d?: Uint16Array;
+            // lbits
+            m?: number;
+            // dbits
+            n?: number;
+            // final
+            f?: number;
+            // pos
+            p?: number;
+            // byte
+            b?: number;
+            // lstchk
+            i?: boolean;
+        };
+    
+        const err = (ind: number, msg?: string | 0, nt?: 1) => {
+            const e: Partial<FlateError> = new Error(msg || ec[ind]);
+            e.code = ind;
+            if ((Error as any).captureStackTrace) (Error as any).captureStackTrace(e, err);
+            if (!nt) throw e;
+            return e as FlateError;
+        }
+    
+        // expands raw DEFLATE data
+        const inflt = (dat: Uint8Array, buf?: Uint8Array, st?: InflateState) => {
+            // source length
+            const sl = dat.length;
+            if (!sl || (st && st.f && !st.l)) return buf || new u8(0);
+            // have to estimate size
+            const noBuf = !buf || (st as any as boolean);
+            // no state
+            const noSt = !st || st.i;
+            if (!st) st = {};
+            // Assumes roughly 33% compression ratio average
+            if (!buf) buf = new u8(sl * 3);
+            // ensure buffer can fit at least l elements
+            const cbuf = (l: number) => {
+                let bl = buf.length;
+                // need to increase size to fit
+                if (l > bl) {
+                    // Double or set to necessary, whichever is greater
+                    const nbuf = new u8(Math.max(bl * 2, l));
+                    nbuf.set(buf);
+                    buf = nbuf;
+                }
+            };
+            //  last chunk         bitpos           bytes
+            let final = st.f || 0, pos = st.p || 0, bt = st.b || 0, lm = st.l, dm = st.d, lbt = st.m, dbt = st.n;
+            // total bits
+            const tbts = sl * 8;
+            do {
+                if (!lm) {
+                    // BFINAL - this is only 1 when last chunk is next
+                    final = bits(dat, pos, 1);
+                    // type: 0 = no compression, 1 = fixed huffman, 2 = dynamic huffman
+                    const type = bits(dat, pos + 1, 3);
+                    pos += 3;
+                    if (!type) {
+                        // go to end of byte boundary
+                        const s = shft(pos) + 4, l = dat[s - 4] | (dat[s - 3] << 8), t = s + l;
+                        if (t > sl) {
+                            if (noSt) err(0);
+                            break;
+                        }
+                        // ensure size
+                        if (noBuf) cbuf(bt + l);
+                        // Copy over uncompressed data
+                        buf.set(dat.subarray(s, t), bt);
+                        // Get new bitpos, update byte count
+                        st.b = bt += l, st.p = pos = t * 8, st.f = final;
+                        continue;
+                    }
+                    else if (type == 1) lm = flrm, dm = fdrm, lbt = 9, dbt = 5;
+                    else if (type == 2) {
+                        //  literal                            lengths
+                        const hLit = bits(dat, pos, 31) + 257, hcLen = bits(dat, pos + 10, 15) + 4;
+                        const tl = hLit + bits(dat, pos + 5, 31) + 1;
+                        pos += 14;
+                        // length+distance tree
+                        const ldt = new u8(tl);
+                        // code length tree
+                        const clt = new u8(19);
+                        for (let i = 0; i < hcLen; ++i) {
+                            // use index map to get real code
+                            clt[clim[i]] = bits(dat, pos + i * 3, 7);
+                        }
+                        pos += hcLen * 3;
+                        // code lengths bits
+                        const clb = max(clt), clbmsk = (1 << clb) - 1;
+                        // code lengths map
+                        const clm = hMap(clt, clb, 1);
+                        for (let i = 0; i < tl;) {
+                            const r = clm[bits(dat, pos, clbmsk)];
+                            // bits read
+                            pos += r & 15;
+                            // symbol
+                            const s = r >>> 4;
+                            // code length to copy
+                            if (s < 16) {
+                                ldt[i++] = s;
+                            } else {
+                                //  copy   count
+                                let c = 0, n = 0;
+                                if (s == 16) n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[i - 1];
+                                else if (s == 17) n = 3 + bits(dat, pos, 7), pos += 3;
+                                else if (s == 18) n = 11 + bits(dat, pos, 127), pos += 7;
+                                while (n--) ldt[i++] = c;
+                            }
+                        }
+                        //    length tree                 distance tree
+                        const lt = ldt.subarray(0, hLit), dt = ldt.subarray(hLit);
+                        // max length bits
+                        lbt = max(lt)
+                        // max dist bits
+                        dbt = max(dt);
+                        lm = hMap(lt, lbt, 1);
+                        dm = hMap(dt, dbt, 1);
+                    } else err(1);
+                    if (pos > tbts) {
+                        if (noSt) err(0);
+                        break;
+                    }
+                }
+                // Make sure the buffer can hold this + the largest possible addition
+                // Maximum chunk size (practically, theoretically infinite) is 2^17;
+                if (noBuf) cbuf(bt + 131072);
+                const lms = (1 << lbt) - 1, dms = (1 << dbt) - 1;
+                let lpos = pos;
+                for (; ; lpos = pos) {
+                    // bits read, code
+                    const c = lm[bits16(dat, pos) & lms], sym = c >>> 4;
+                    pos += c & 15;
+                    if (pos > tbts) {
+                        if (noSt) err(0);
+                        break;
+                    }
+                    if (!c) err(2);
+                    if (sym < 256) buf[bt++] = sym;
+                    else if (sym == 256) {
+                        lpos = pos, lm = null;
+                        break;
+                    } else {
+                        let add = sym - 254;
+                        // no extra bits needed if less
+                        if (sym > 264) {
+                            // index
+                            const i = sym - 257, b = fleb[i];
+                            add = bits(dat, pos, (1 << b) - 1) + fl[i];
+                            pos += b;
+                        }
+                        // dist
+                        const d = dm[bits16(dat, pos) & dms], dsym = d >>> 4;
+                        if (!d) err(3);
+                        pos += d & 15;
+                        let dt = fd[dsym];
+                        if (dsym > 3) {
+                            const b = fdeb[dsym];
+                            dt += bits16(dat, pos) & ((1 << b) - 1), pos += b;
+                        }
+                        if (pos > tbts) {
+                            if (noSt) err(0);
+                            break;
+                        }
+                        if (noBuf) cbuf(bt + 131072);
+                        const end = bt + add;
+                        for (; bt < end; bt += 4) {
+                            buf[bt] = buf[bt - dt];
+                            buf[bt + 1] = buf[bt + 1 - dt];
+                            buf[bt + 2] = buf[bt + 2 - dt];
+                            buf[bt + 3] = buf[bt + 3 - dt];
+                        }
+                        bt = end;
+                    }
+                }
+                st.l = lm, st.p = lpos, st.b = bt, st.f = final;
+                if (lm) final = 1, st.m = lbt, st.d = dm, st.n = dbt;
+            } while (!final)
+            return bt == buf.length ? buf : slc(buf, 0, bt);
+        }
+    
+        var et = /* @__PURE__ */ new u8(0);
+        function inflateSync(data: Uint8Array, out?: Uint8Array): Uint8Array {
+            return inflt(data, out) as any;
+        }
+        var td = typeof TextDecoder != "undefined" && /* @__PURE__ */ new TextDecoder();
+        var tds = 0;
+        try {
+            td.decode(et, { stream: true });
+            tds = 1;
+        } catch (e) {
+        }
+    
+        // a.ts
+        return {
+            inflateSync
+        };
+    })();
 
     export type AssetTypes = PIXI.Texture | BitmapFont | Frame[] | utils.XmlNode | PIXI.LoaderResource;
 
