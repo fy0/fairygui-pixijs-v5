@@ -32,7 +32,7 @@ namespace fgui {
         protected $relations: Relations;
         protected $group: GGroup;
         protected $gears: GearBase<GObject>[];
-        protected $displayObject: PIXI.DisplayObject;
+        public $displayObject: PIXI.DisplayObject;
         protected $dragBounds: PIXI.Rectangle;
         protected $handlingController:boolean = false;
 
@@ -730,6 +730,11 @@ namespace fgui {
             this.removeFromParent();
             this.$relations.dispose();
             this.removeAllListeners();
+            // NOTE: 根据当前版本修改，但是没有this.$owner
+            // this.$owner.off(fgui.InteractiveEvents.Move, this.$moving, this);
+            // this.$owner.off(fgui.InteractiveEvents.Up, this.$end, this);
+            // this.$owner.off(fgui.InteractiveEvents.Move, this.$moving2, this);
+            // this.$owner.off(fgui.InteractiveEvents.Up, this.$end2, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$moving, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$end, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$moving2, this);
@@ -781,10 +786,11 @@ namespace fgui {
         }
 
         public hasListener(event: string, handler?:Function): boolean {   //do we need to also check the context?
-            if(!handler)
-                return this.$displayObject.listenerCount(event) > 0;
-            else
-                return this.$displayObject.listeners(event).indexOf(handler) >= 0;
+            // NOTE: 根据当前版本修改
+            // if(!handler)
+            //     return this.$displayObject.listenerCount(event) > 0;
+            // else
+            return this.$displayObject.listeners(event).indexOf(handler) >= 0;
         }
 
         public emit(event: string, ...args: any[]): boolean {
@@ -1118,12 +1124,18 @@ namespace fgui {
             this.localToGlobalRect(0, 0, this.width, this.height, GObject.sGlobalRect);
             GObject.draggingObject = this;
 
+            // NOTE: 根据当前版本修改，但无$owner
+            // this.$owner.on(fgui.InteractiveEvents.Move, this.$moving2, this);
+            // this.$owner.on(fgui.InteractiveEvents.Up, this.$end2, this);
             GRoot.inst.nativeStage.on(InteractiveEvents.Move, this.$moving2, this);
             GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$end2, this);
         }
 
         private dragEnd(): void {
             if (GObject.draggingObject == this) {
+                // NOTE: 根据当前版本修改，但无$owner
+                // this.$owner.off(fgui.InteractiveEvents.Move, this.$moving2, this);
+                // this.$owner.off(fgui.InteractiveEvents.Up, this.$end2, this);
                 GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$moving2, this);
                 GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$end2, this);
                 GObject.draggingObject = null;
@@ -1132,6 +1144,9 @@ namespace fgui {
         }
 
         private reset(): void {
+            // NOTE: 根据当前版本修改，但无$owner
+            // fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Move, this.$moving, this);
+            // fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Up, this.$end, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$moving, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$end, this);
         }
@@ -1143,6 +1158,9 @@ namespace fgui {
             this.$touchDownPoint.y = evt.data.global.y;
             GRoot.inst.nativeStage.on(InteractiveEvents.Move, this.$moving, this);
             GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$end, this);
+            // NOTE: 根据当前版本修改，但无$owner
+            // this.$owner.on(fgui.InteractiveEvents.Move, this.$moving, this);
+            // this.$owner.on(fgui.InteractiveEvents.Up, this.$end, this);
         }
 
         private $end(evt: PIXI.InteractionEvent): void {

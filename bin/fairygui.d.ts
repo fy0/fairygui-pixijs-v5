@@ -238,7 +238,7 @@ declare namespace fgui {
         protected $relations: Relations;
         protected $group: GGroup;
         protected $gears: GearBase<GObject>[];
-        protected $displayObject: PIXI.DisplayObject;
+        $displayObject: PIXI.DisplayObject;
         protected $dragBounds: PIXI.Rectangle;
         protected $handlingController: boolean;
         private static $colorHelper;
@@ -482,6 +482,7 @@ declare namespace fgui {
         private $linkedPopup;
         private $downEffect;
         private $downEffectValue;
+        private $clicksound;
         private $down;
         private $over;
         static UP: string;
@@ -518,6 +519,7 @@ declare namespace fgui {
         private $mousedown;
         private $mouseup;
         private $click;
+        private playSound;
         dispose(): void;
     }
 }
@@ -973,7 +975,7 @@ declare namespace fgui {
     }
     class GRoot extends GComponent {
         private static uniqueID;
-        private $uiStage;
+        $uiStage: UIStage;
         private $modalLayer;
         private $popupStack;
         private $justClosedPopups;
@@ -1470,6 +1472,7 @@ declare namespace fgui {
         static TWEEN_MANUALLY_SET_DURATION: number;
         static PULL_DIST_RATIO: number;
         $loop: number;
+        interactive: boolean;
         constructor(owner: GComponent, scrollType: number, scrollBarMargin: utils.Margin, scrollBarDisplay: number, flags: number, vtScrollBarRes: string, hzScrollBarRes: string, headerRes: string, footerRes: string);
         dispose(): void;
         readonly owner: GComponent;
@@ -1529,7 +1532,7 @@ declare namespace fgui {
         private $mouseDown;
         private $mouseMove;
         private $mouseUp;
-        private $click;
+        $click(ev: any): void;
         private $mouseWheel;
         private $rollOver;
         private $rollOut;
@@ -2254,7 +2257,7 @@ declare namespace fgui {
         [key: string]: string | number;
     }
     class UIStage extends PIXI.utils.EventEmitter {
-        protected $appContext: PIXI.Application;
+        $appContext: PIXI.Application;
         protected $appStage: PIXI.Container;
         protected $options: UIStageOptions;
         protected $width: number;

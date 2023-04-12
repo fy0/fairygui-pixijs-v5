@@ -78,6 +78,7 @@ namespace fgui {
 
         /**@internal */
         $loop: number;
+        interactive: boolean;
 
         public constructor(owner: GComponent,
             scrollType: number,
@@ -210,6 +211,25 @@ namespace fgui {
             this.$owner.on(InteractiveEvents.Out, this.$rollOut, this);
             this.$owner.on(InteractiveEvents.Down, this.$mouseDown, this);
             this.$owner.on(DisplayObjectEvent.MOUSE_WHEEL, this.$mouseWheel, this);
+
+            // NOTE: 根据当前版本修改，但因为没有EventBoundary进行改写
+            // EventBoundary 从 v6.1.0-rc 开始有，见 https://github.com/pixijs/pixijs/pull/7213
+            // // this.$owner.on(fgui.InteractiveEvents.Click, this.$click, this); //暂存
+            // this.boundary = new PIXI.EventBoundary(this.owner.$container)
+            let events = 
+            [
+                'pointerdown',
+                'pointerup',
+                'pointermove',
+                'pointerover',
+                'pointerout',
+                'wheel'
+            ]
+            events.forEach((event) => {
+                this.$owner.on(event, (e) => this.owner.$container.emit(e));
+                // this.$owner.on(event, (e) => this.boundary.mapEvent(e));
+                //消息转发
+            });
         }
 
         public dispose(): void {
@@ -226,10 +246,14 @@ namespace fgui {
                 this.$header.dispose();
             if (this.$footer != null)
                 this.$footer.dispose();
-                
-            GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
+
+            // NOTE: 根据当前版本修改
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            // this.$owner.off(fgui.InteractiveEvents.Click, this.$click, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
 
             this.$owner.off(InteractiveEvents.Over, this.$rollOver, this);
             this.$owner.off(InteractiveEvents.Out, this.$rollOut, this);
@@ -578,9 +602,14 @@ namespace fgui {
         }
 
         public cancelDragging(): void {
-            GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
+            // NOTE: 根据当前版本修改
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            // this.$owner.off(fgui.InteractiveEvents.Click, this.$click, this);
+
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
 
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
@@ -1035,6 +1064,10 @@ namespace fgui {
             else
                 this.$isDragging = false;
 
+            // NOTE: 根据当前版本修改
+            fgui.GRoot.globalMouseStatus.mouseX = (e as any).clientX
+            fgui.GRoot.globalMouseStatus.mouseY = (e as any).clientY
+    
             const globalMouse: PIXI.Point = PIXI.utils.isMobile.any ? 
                 this.$owner.globalToLocal(e.data.global.x, e.data.global.y)
                 : this.$owner.globalToLocal(GRoot.globalMouseStatus.mouseX, GRoot.globalMouseStatus.mouseY, ScrollPane.sHelperPoint);
@@ -1048,9 +1081,19 @@ namespace fgui {
             this.$velocityScale = 1;
             this.$lastMoveTime = GTimer.inst.curTime / 1000;
 
-            GRoot.inst.nativeStage.on(InteractiveEvents.Move, this.$mouseMove, this);
-            GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$mouseUp, this);
-            GRoot.inst.nativeStage.on(InteractiveEvents.Click, this.$click, this);
+            // NOTE: 根据当前版本修改
+            // fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            // fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            // fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
+            // fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Click, this.$click, this);
+            this.$owner.on(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.on(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            this.$owner.on(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
+            // this.$owner.on(fgui.InteractiveEvents.Click, this.$click, this);
+
+            // GRoot.inst.nativeStage.on(InteractiveEvents.Move, this.$mouseMove, this);
+            // GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$mouseUp, this);
+            // GRoot.inst.nativeStage.on(InteractiveEvents.Click, this.$click, this);
         }
 
         private $mouseMove(): void {
@@ -1225,9 +1268,13 @@ namespace fgui {
         }
 
         private $mouseUp(): void {
-            GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
-            GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
+            // NOTE: 根据当前版本修改
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$mouseMove, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseUp, this);
+            // GRoot.inst.nativeStage.off(InteractiveEvents.Click, this.$click, this);
 
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
@@ -1338,8 +1385,27 @@ namespace fgui {
             GTimer.inst.addLoop(1, this.tweenUpdate, this);
         }
 
-        private $click(): void {
+        $click(ev) {
+            // NOTE: 根据当前版本修改，因为没有 this.boundary 做了一点调整
             this.$isDragging = false;
+             //fgui.GRoot.inst.$uiStage.$appContext.renderer.events.rootBoundary
+            let x = fgui.GRoot.globalMouseStatus.mouseX
+            let y = fgui.GRoot.globalMouseStatus.mouseY
+            let c = this.owner.$displayObject
+            this.$maskContainer.interactive = false
+            this.$owner.off(fgui.InteractiveEvents.Click, this.$click, this); //暂存
+
+            let hit = fgui.GRoot.inst.$uiStage.$appContext.renderer.plugins.interaction.hitTest(x, y);
+            // let hit = this.boundary.hitTest(x,y)
+            console.log("点击测试",this,this.owner,hit)
+            if (hit){
+                let view = hit.UIOwner //列表中的单体
+                ev.currentTarget = hit
+                view.emit(fgui.InteractiveEvents.Click,ev)
+                // this.owner.emit(fgui.ListEvent.ItemClick,view)
+            }
+            this.interactive = true
+            this.$owner.on(fgui.InteractiveEvents.Click, this.$click, this); //暂存
         }
 
         private $mouseWheel(evt: any): void {

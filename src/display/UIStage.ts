@@ -104,7 +104,7 @@ namespace fgui {
 
     export class UIStage extends PIXI.utils.EventEmitter {
 
-        protected $appContext: PIXI.Application;
+        public $appContext: PIXI.Application;
         protected $appStage: PIXI.Container;
 
         protected $options: UIStageOptions;

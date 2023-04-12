@@ -76,7 +76,9 @@ namespace fgui {
             this.$align = AlignType.Left;
             this.$verticalAlign = VertAlignType.Top;
 
-            this.$container = new PIXI.Container();
+            // NOTE: 根据当前版本修改
+            // this.$container = new PIXI.Container();
+            this.$container = new fgui.UIContainer();
             this.$rootContainer.addChild(this.$container);
         }
 

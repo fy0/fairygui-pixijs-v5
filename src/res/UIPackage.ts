@@ -567,6 +567,17 @@ namespace fgui {
         private create(resKey: string): void {
             this.$resKey = resKey;
 
+            // NOTE: 根据当前版本修改，注释掉这段是v7代码
+            // let buf = fgui.utils.Assets.get(this.$resKey);
+            // if (!buf)
+            //     buf = fgui.utils.Assets.get(`${this.$resKey}_fui`);
+            // if (!buf)
+            //     throw new Error(`Resource '${this.$resKey}' not found, please make sure that you use "new fgui.utils.AssetLoader" to load resources instead of " PIXI.loaders.Loader".`);
+            // // if (!(buf instanceof ArrayBuffer || buf instanceof Uint8Array))
+            // //     buf = ArrayBuffer.from(buf)
+            //     //throw new Error(typeof buf + ` Resource '${this.$resKey}' is not a proper binary resource, please load it as binary format by calling yourLoader.add(name, url, { loadType:PIXI.loaders.Resource.LOAD_TYPE.XHR, xhrType: PIXI.loaders.Resource.XHR_RESPONSE_TYPE.BUFFER })`);
+            // this.decompressPackage(buf);
+
             let buf: PIXI.LoaderResource = utils.AssetLoader.resourcesPool[this.$resKey];
             if (!buf)
                 buf = utils.AssetLoader.resourcesPool[`${this.$resKey}_fui`];
@@ -721,8 +732,13 @@ namespace fgui {
                 let cfg = this.$atlasConfigs[pi.id];
                 if(cfg)
                     utils.AssetLoader.destroyResource(`${this.$resKey}@${cfg.atlasName}`);
+
+                // NOTE: pixi7
+                // fgui.utils.Assets.unload(`${this.$resKey}@${cfg.atlasName}`);
             }, this);
 
+            // NOTE: pixi7
+            // fgui.utils.Assets.unload(`${this.$resKey}`);
             utils.AssetLoader.destroyResource(`${this.$resKey}`);
         }
 
@@ -823,6 +839,16 @@ namespace fgui {
                             res = utils.AssetLoader.resourcesPool[`${this.$resKey}@${fileName.replace("\.", "_")}`];
                             item.texture = res.texture;
                         }
+
+                        // NOTE: pixi7
+                        // let res = fgui.utils.Assets.get(resName);
+                        // if (!res)
+                        //     throw new Error(`${resName} not found in fgui.utils.AssetLoader.resourcesPool, please use new AssetLoader() to load assets instead of using new PIXI.loaders.Loader(). besides, AssetLoader is a sub-class from PIXI.loaders.Loader so they have the same usage.`);
+                        // item.texture = res;
+                        // if (!item.texture) {
+                        //     res = fgui.utils.Assets.get(`${this.$resKey}@${fileName.replace("\.", "_")}`);
+                        //     item.texture = res;
+                        // }
                     }
                     return item.texture;
 
@@ -857,6 +883,8 @@ namespace fgui {
 
                 default:
                     return utils.AssetLoader.resourcesPool[`${this.$resKey}@${item.id}`];
+                    // NOTE: pixi7
+                    // return fgui.utils.AssetLoader.resourcesPool[`${this.$resKey}@${item.id}`];
             }
         }
 

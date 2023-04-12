@@ -98,7 +98,9 @@ namespace fgui {
             this.$dragOffset.x -= this.$grip.x;
             this.$dragOffset.y -= this.$grip.y;
 
+            // NOTE: 根据当前版本修改，但是没有owner
             let g = GRoot.inst.nativeStage;
+            // let g = this.$owner;
             g.on(InteractiveEvents.Move, this.$gripDragging, this);
             g.on(InteractiveEvents.Up, this.$gripDraggingEnd, this);
         }
@@ -117,7 +119,9 @@ namespace fgui {
         }
 
         private $gripDraggingEnd(evt: PIXI.InteractionEvent): void {
+            // NOTE: 根据当前版本修改，但没有$owner
             let g = GRoot.inst.nativeStage;
+            // let g = this.$owner;
             g.off(InteractiveEvents.Move, this.$gripDragging, this);
             g.off(InteractiveEvents.Up, this.$gripDraggingEnd, this);
         }

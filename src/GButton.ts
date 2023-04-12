@@ -19,6 +19,7 @@ namespace fgui {
         private $linkedPopup: GObject;
         private $downEffect: number;
         private $downEffectValue: number;
+        private $clicksound: string;
 
         private $down: boolean;
         private $over: boolean;
@@ -344,6 +345,11 @@ namespace fgui {
                     this.$relatedController = this.$parent.getController(str);
                 else
                     this.$relatedController = null;
+                str = xml.attributes.sound;
+                if (str)
+                    this.$clicksound = str;
+                else
+                    this.$clicksound = null;
                 this.$pageOption.id = xml.attributes.page;
                 this.selected = xml.attributes.checked == "true";
             }
@@ -418,6 +424,37 @@ namespace fgui {
                 if (!this.$selected) {
                     this.selected = true;
                     this.emit(StateChangeEvent.CHANGED, this);
+                }
+            }
+
+            // 这里比后面版本缺了一段
+            if (this.$clicksound) {
+                var packname = this.packageItem.owner.name;
+                var item = fgui.UIPackage.getItemByURL(this.$clicksound);
+                if (item) {
+                    var resource = fgui.utils.AssetLoader.resourcesPool[`${packname}@${item.id}`];
+                    // var resource = fgui.utils.Assets.get(`${packname}@${item.id}`); // v7
+                    this.playSound(resource);
+                }
+            }
+        }
+
+        private async playSound(resource: PIXI.LoaderResource) {
+            //buff.data:ArrayBuffer 
+            //!!!ArrayBuffer长度为0的原因:
+            //注意:
+            //当加载了pixi-sound库时,音频文件将自动解析成resource.sound属性;
+            //从而将ArrayBuffer读取并置空
+            if (!!(PIXI as any).sound) {
+                let Sound: { from: (...args) => any } = (PIXI as any).sound.Sound;
+                if ((resource as any).sound) {
+                    // NOTE: 这是v7的变化？还是别的
+                    // resource.play();
+                    (resource as any).sound.play();
+                } else {
+                    // let sound = Sound.from(resource);
+                    let sound = Sound.from(resource.data);
+                    sound.play((sound) => sound.destroy());
                 }
             }
         }

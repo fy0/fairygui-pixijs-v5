@@ -11,6 +11,41 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 
 (function (fgui) {
     var win = window;
@@ -1136,10 +1171,7 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             return this;
         };
         GObject.prototype.hasListener = function (event, handler) {
-            if (!handler)
-                return this.$displayObject.listenerCount(event) > 0;
-            else
-                return this.$displayObject.listeners(event).indexOf(handler) >= 0;
+            return this.$displayObject.listeners(event).indexOf(handler) >= 0;
         };
         GObject.prototype.emit = function (event) {
             var args = [];
@@ -2672,6 +2704,11 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
                     this.$relatedController = this.$parent.getController(str);
                 else
                     this.$relatedController = null;
+                str = xml.attributes.sound;
+                if (str)
+                    this.$clicksound = str;
+                else
+                    this.$clicksound = null;
                 this.$pageOption.id = xml.attributes.page;
                 this.selected = xml.attributes.checked == "true";
             }
@@ -2735,6 +2772,32 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
                     this.emit(fgui.StateChangeEvent.CHANGED, this);
                 }
             }
+            if (this.$clicksound) {
+                var packname = this.packageItem.owner.name;
+                var item = fgui.UIPackage.getItemByURL(this.$clicksound);
+                if (item) {
+                    var resource = fgui.utils.AssetLoader.resourcesPool[packname + "@" + item.id];
+                    this.playSound(resource);
+                }
+            }
+        };
+        GButton.prototype.playSound = function (resource) {
+            return __awaiter(this, void 0, void 0, function () {
+                var Sound, sound;
+                return __generator(this, function (_a) {
+                    if (!!PIXI.sound) {
+                        Sound = PIXI.sound.Sound;
+                        if (resource.sound) {
+                            resource.sound.play();
+                        }
+                        else {
+                            sound = Sound.from(resource.data);
+                            sound.play(function (sound) { return sound.destroy(); });
+                        }
+                    }
+                    return [2];
+                });
+            });
         };
         GButton.prototype.dispose = function () {
             fgui.GTimer.inst.remove(this.setState, this);
@@ -3614,7 +3677,7 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             _this.scrollItemToViewOnClick = true;
             _this.$align = "left";
             _this.$verticalAlign = 0;
-            _this.$container = new PIXI.Container();
+            _this.$container = new fgui.UIContainer();
             _this.$rootContainer.addChild(_this.$container);
             return _this;
         }
@@ -7622,8 +7685,8 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
         GRoot.prototype.dispatchMouseWheel = function (evt) {
             var childUnderMouse = this.getObjectUnderPoint(GRoot.globalMouseStatus.mouseX, GRoot.globalMouseStatus.mouseY);
             if (childUnderMouse != null) {
+                childUnderMouse.emit(fgui.DisplayObjectEvent.MOUSE_WHEEL, evt);
                 while (childUnderMouse.parent && childUnderMouse.parent != this) {
-                    childUnderMouse.emit(fgui.DisplayObjectEvent.MOUSE_WHEEL, evt);
                     childUnderMouse = childUnderMouse.parent;
                 }
             }
@@ -10369,6 +10432,17 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             _this.$owner.on(fgui.InteractiveEvents.Out, _this.$rollOut, _this);
             _this.$owner.on(fgui.InteractiveEvents.Down, _this.$mouseDown, _this);
             _this.$owner.on(fgui.DisplayObjectEvent.MOUSE_WHEEL, _this.$mouseWheel, _this);
+            var events = [
+                'pointerdown',
+                'pointerup',
+                'pointermove',
+                'pointerover',
+                'pointerout',
+                'wheel'
+            ];
+            events.forEach(function (event) {
+                _this.$owner.on(event, function (e) { return _this.owner.$container.emit(e); });
+            });
             return _this;
         }
         ScrollPane.prototype.dispose = function () {
@@ -10383,9 +10457,8 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
                 this.$header.dispose();
             if (this.$footer != null)
                 this.$footer.dispose();
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Click, this.$click, this);
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
             this.$owner.off(fgui.InteractiveEvents.Over, this.$rollOver, this);
             this.$owner.off(fgui.InteractiveEvents.Out, this.$rollOut, this);
             this.$owner.off(fgui.InteractiveEvents.Down, this.$mouseDown, this);
@@ -10785,9 +10858,8 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             return true;
         };
         ScrollPane.prototype.cancelDragging = function () {
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Click, this.$click, this);
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
             ScrollPane.$gestureFlag = 0;
@@ -11171,6 +11243,8 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             }
             else
                 this.$isDragging = false;
+            fgui.GRoot.globalMouseStatus.mouseX = e.clientX;
+            fgui.GRoot.globalMouseStatus.mouseY = e.clientY;
             var globalMouse = PIXI.utils.isMobile.any ?
                 this.$owner.globalToLocal(e.data.global.x, e.data.global.y)
                 : this.$owner.globalToLocal(fgui.GRoot.globalMouseStatus.mouseX, fgui.GRoot.globalMouseStatus.mouseY, ScrollPane.sHelperPoint);
@@ -11182,9 +11256,9 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             this.$velocity.set(0, 0);
             this.$velocityScale = 1;
             this.$lastMoveTime = fgui.GTimer.inst.curTime / 1000;
-            fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Move, this.$mouseMove, this);
-            fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Up, this.$mouseUp, this);
-            fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Click, this.$click, this);
+            this.$owner.on(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.on(fgui.InteractiveEvents.Up, this.$mouseUp, this);
+            this.$owner.on(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
         };
         ScrollPane.prototype.$mouseMove = function () {
             if (!this.$touchEffect)
@@ -11328,9 +11402,9 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             this.emit(fgui.ScrollEvent.SCROLL, this);
         };
         ScrollPane.prototype.$mouseUp = function () {
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Click, this.$click, this);
+            this.$owner.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
+            this.$owner.off(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
+            this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
             if (ScrollPane.draggingPane == this)
                 ScrollPane.draggingPane = null;
             ScrollPane.$gestureFlag = 0;
@@ -11422,8 +11496,22 @@ PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (f
             this.$tweenTime.set(0, 0);
             fgui.GTimer.inst.addLoop(1, this.tweenUpdate, this);
         };
-        ScrollPane.prototype.$click = function () {
+        ScrollPane.prototype.$click = function (ev) {
             this.$isDragging = false;
+            var x = fgui.GRoot.globalMouseStatus.mouseX;
+            var y = fgui.GRoot.globalMouseStatus.mouseY;
+            var c = this.owner.$displayObject;
+            this.$maskContainer.interactive = false;
+            this.$owner.off(fgui.InteractiveEvents.Click, this.$click, this);
+            var hit = fgui.GRoot.inst.$uiStage.$appContext.renderer.plugins.interaction.hitTest(x, y);
+            console.log("点击测试", this, this.owner, hit);
+            if (hit) {
+                var view = hit.UIOwner;
+                ev.currentTarget = hit;
+                view.emit(fgui.InteractiveEvents.Click, ev);
+            }
+            this.interactive = true;
+            this.$owner.on(fgui.InteractiveEvents.Click, this.$click, this);
         };
         ScrollPane.prototype.$mouseWheel = function (evt) {
             if (!this.$mouseWheelEnabled)

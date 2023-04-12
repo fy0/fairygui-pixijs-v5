@@ -211,6 +211,8 @@ namespace fgui {
             GTimer.inst.remove(this.delayedClickItem, this);
             this.$list.off(ListEvent.ItemClick, this.$clickItem, this);
             this.$dropdown.off("removed", this.$popupWinClosed, this);
+            // NOTE: 根据当前版本修改
+            // this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseup, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseup, this);
             this.$popupWinClosed(null);
             if (this.$dropdown) {
@@ -345,7 +347,9 @@ namespace fgui {
 
             this.$down = true;
             GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$mouseup, this);
-            
+            // NOTE: 根据当前版本修改
+            // this.$owner.on(fgui.InteractiveEvents.Up, this.$mouseup, this);
+
             if (this.$dropdown)
                 this.showDropdown();
         }
@@ -355,7 +359,9 @@ namespace fgui {
                 this.$down = false;
 
                 GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$mouseup, this);
-                
+                // NOTE: 根据当前版本修改
+                // this.$owner.off(fgui.InteractiveEvents.Up, this.$mouseup, this);
+
                 if (this.$dropdown && !this.$dropdown.parent) {
                     if (this.$over)
                         this.setState(GButton.OVER);

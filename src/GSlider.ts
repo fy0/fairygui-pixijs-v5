@@ -150,6 +150,9 @@ namespace fgui {
             this.$clickPos = this.globalToLocal(evt.data.global.x, evt.data.global.y);
             this.$clickPercent = this.$value / this.$max;
 
+            // NOTE: 根据当前版本修改，但没有$owner
+            // this.$owner.on(fgui.InteractiveEvents.Move, this.$gripMouseMove, this);
+            // this.$owner.on(fgui.InteractiveEvents.Up, this.$gripMouseUp, this);
             GRoot.inst.nativeStage.on(InteractiveEvents.Move, this.$gripMouseMove, this);
             GRoot.inst.nativeStage.on(InteractiveEvents.Up, this.$gripMouseUp, this);
         }
@@ -182,6 +185,9 @@ namespace fgui {
             let percent: number = this.$value / this.$max;
             this.updateWidthPercent(percent);
 
+            // NOTE: 根据当前版本修改，但没有$owner
+            // this.$owner.off(fgui.InteractiveEvents.Move, this.$gripMouseMove, this);
+            // this.$owner.off(fgui.InteractiveEvents.Up, this.$gripMouseUp, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$gripMouseMove, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$gripMouseUp, this);
         }
@@ -189,6 +195,9 @@ namespace fgui {
         public dispose():void {
             if (this.$gripObject)
                 this.$gripObject.off(InteractiveEvents.Down, this.$gripMouseDown, this);
+            // NOTE: 根据当前版本修改，但没有$owner
+            // this.$owner.off(fgui.InteractiveEvents.Move, this.$gripMouseMove, this);
+            // this.$owner.off(fgui.InteractiveEvents.Up, this.$gripMouseUp, this);    
             GRoot.inst.nativeStage.off(InteractiveEvents.Move, this.$gripMouseMove, this);
             GRoot.inst.nativeStage.off(InteractiveEvents.Up, this.$gripMouseUp, this);
             super.dispose();

@@ -10,7 +10,7 @@ namespace fgui {
 
         private static uniqueID:number = 0;
 
-        private $uiStage: UIStage;
+        public $uiStage: UIStage;
 
         private $modalLayer: GGraph;
         private $popupStack: GObject[];
@@ -126,10 +126,18 @@ namespace fgui {
         }
 
         protected dispatchMouseWheel(evt:any):void {
+            // let childUnderMouse = this.getObjectUnderPoint(GRoot.globalMouseStatus.mouseX, GRoot.globalMouseStatus.mouseY);
+            // if(childUnderMouse != null) { //bubble
+            //     while(childUnderMouse.parent && childUnderMouse.parent != this) {
+            //         childUnderMouse.emit(DisplayObjectEvent.MOUSE_WHEEL, evt);
+            //         childUnderMouse = childUnderMouse.parent;
+            //     }
+            // }
+            // NOTE: 根据当前版本修改
             let childUnderMouse = this.getObjectUnderPoint(GRoot.globalMouseStatus.mouseX, GRoot.globalMouseStatus.mouseY);
-            if(childUnderMouse != null) { //bubble
-                while(childUnderMouse.parent && childUnderMouse.parent != this) {
-                    childUnderMouse.emit(DisplayObjectEvent.MOUSE_WHEEL, evt);
+            if (childUnderMouse != null) {
+                childUnderMouse.emit(fgui.DisplayObjectEvent.MOUSE_WHEEL, evt);
+                while (childUnderMouse.parent && childUnderMouse.parent != this) {
                     childUnderMouse = childUnderMouse.parent;
                 }
             }
@@ -141,9 +149,14 @@ namespace fgui {
          * @param globalY the stage Y
          */
         public getObjectUnderPoint(globalX:number, globalY:number):GObject {
+            // NOTE: 根据当前版本修改，但是缺方法，所以用之前的
             GRoot.sHelperPoint.set(globalX, globalY);
             let ret: PIXI.DisplayObject = this.$uiStage.applicationContext.renderer.plugins.interaction.hitTest(GRoot.sHelperPoint, this.nativeStage);
             return GObject.castFromNativeObject(ret);
+            // GRoot.sHelperPoint.set(globalX, globalY);
+            // const boundary = this.$uiStage.$appContext.renderer.events.rootBoundary
+            // let ret = boundary.hitTest(globalX, globalY);
+            // return fgui.GObject.castFromNativeObject(ret) || ret.parent;
         }
 
         public showWindow(win: Window): void {
