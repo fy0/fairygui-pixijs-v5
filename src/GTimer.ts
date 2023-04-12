@@ -15,11 +15,6 @@ namespace fgui {
         public constructor() {
             this.$items = [];
             this.$itemPool = [];
-
-            // 这里必须使用定制的tween.js并加上这个函数
-            if ((TWEEN as any).setupNow) {
-                (TWEEN as any).setupNow(() => this.$startedTime);
-            }
         }
 
         private getItem(): TimerItem {

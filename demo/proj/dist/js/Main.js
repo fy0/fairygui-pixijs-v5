@@ -72,13 +72,14 @@ define(["require", "exports", "./LoadingView", "./WindowA", "./WindowB", "./Wind
             }
         };
         Main.prototype.resLoaded = function (loader) {
-            loader.destroy();
+            // loader.destroy();
             fgui.UIPackage.addPackage("test");
             var ins = fgui.UIPackage.createObject("test", "main");
             ins.setSize(fgui.GRoot.inst.width, fgui.GRoot.inst.height);
             ins.addRelation(fgui.GRoot.inst, 24 /* fgui.RelationType.Size */);
             this.contentlayer.addChild(ins);
             this.initClicks(ins);
+			fgui.GRoot.inst.$winResize(fgui.GRoot.inst.$uiStage);
         };
         Main.prototype.renderFunc = function (index, item) {
             item.text = index.toString();

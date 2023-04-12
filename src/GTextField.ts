@@ -28,7 +28,8 @@ namespace fgui {
         }
 
         public static recycleMany(value: LineInfo[]): void {
-            if (value && value.length) {
+            if(value && value.length)
+            {
                 value.forEach(v => {
                     LineInfo.pool.push(v);
                 }, this);
@@ -45,15 +46,15 @@ namespace fgui {
         protected $lines: LineInfo[];
         protected $bitmapPool: PIXI.Sprite[];
         protected $font: string;   //could be either fontFamily or an URI pointed to a bitmap font resource
-
+        
         protected $style: PIXI.TextStyle;
         protected $verticalAlign: VertAlignType = VertAlignType.Top;
         protected $offset: PIXI.Point = new PIXI.Point();
-        protected $color: number | number[];
-        protected $singleLine: boolean = true;
+        protected $color: number;
+        protected $singleLine:boolean = true;
 
         protected $text: string = "";
-        protected $fontProperties: PIXI.IFontMetrics;
+        protected $fontProperties:PIXI.IFontMetrics;
 
         protected $autoSize: AutoSizeType;
         protected $widthAutoSize: boolean;
@@ -65,10 +66,10 @@ namespace fgui {
 
         protected $textWidth: number = 0;
         protected $textHeight: number = 0;
-
+        
         public static GUTTER_X: number = 2;
         public static GUTTER_Y: number = 2;
-
+        
         public constructor() {
             super();
 
@@ -114,12 +115,12 @@ namespace fgui {
             super.dispose();
         }
 
-        public set text(value: string) {
+        public set text(value:string) {
             this.setText(value);
-        }
 
-        protected setText(value: string): void {
-            if (value == null) value = "";
+        }
+        protected setText(value: string):void {
+            if(value == null) value = "";
             if (this.$text == value) return;
             this.$text = value;
             this.updateGear(GearType.Text);
@@ -133,31 +134,19 @@ namespace fgui {
             return this.getText();
         }
 
-        protected getText(): string {
+        protected getText():string {
             return this.$text;
         }
 
-        public set color(value: number) {
-            this.setColor(value);
-        }
-
         public get color(): number {
-            return this.getColor() as number;
+            return this.getColor();
         }
 
-        public set colors(value: number[]) {
-            this.setColor(value);
+        protected getColor():number {
+            return this.$color;
         }
 
-        public get colors(): number[] {
-            return this.getColor() as number[];
-        }
-
-        protected getColor(): number | number[] {
-            return this.$color as number;
-        }
-
-        protected setColor(value: number | number[]): void {
+        protected setColor(value:number):void {
             if (this.$color != value) {
                 this.$color = value;
                 this.updateGear(GearType.Color);
@@ -166,6 +155,9 @@ namespace fgui {
             }
         }
 
+        public set color(value: number) {
+            this.setColor(value);
+        }
 
         public get titleColor(): number {
             return this.color;
@@ -174,17 +166,17 @@ namespace fgui {
         public set titleColor(value: number) {
             this.color = value;
         }
-
-        public get lineHeight(): number {
-            if (this.$style.lineHeight > 0)
+        
+        public get lineHeight():number {
+            if(this.$style.lineHeight > 0)
                 return this.$style.lineHeight;
-
-            if (!this.$fontProperties) return (+this.$style.fontSize) + this.$style.strokeThickness;  //rough value
+            
+            if(!this.$fontProperties) return (+this.$style.fontSize) + this.$style.strokeThickness;  //rough value
 
             return this.$fontProperties.fontSize + this.$style.strokeThickness + this.$style.leading;
         }
 
-        public set lineHeight(lh: number) {
+        public set lineHeight(lh:number) {
             this.$style.lineHeight = lh;
         }
 
@@ -234,7 +226,7 @@ namespace fgui {
         public set verticalAlign(value: VertAlignType) {
             if (this.$verticalAlign != value) {
                 this.$verticalAlign = value;
-                if (!this.$inProgressBuilding)
+                if(!this.$inProgressBuilding)
                     this.layoutAlign();
             }
         }
@@ -276,27 +268,27 @@ namespace fgui {
         public set bold(value: boolean) {
             let v: string = value === true ? "bold" : "normal";
             if (this.$style.fontWeight != v) {
-                this.$style.fontWeight = v as PIXI.TextStyleFontWeight;
+                this.$style.fontWeight = v;
                 this.render();
             }
         }
-
-        public get weight(): PIXI.TextStyleFontWeight {
+        
+        public get weight(): string {
             return this.$style.fontWeight;
         }
 
-        public set weight(v: PIXI.TextStyleFontWeight) {
+        public set weight(v: string) {
             if (this.$style.fontWeight != v) {
                 this.$style.fontWeight = v;
                 this.render();
             }
         }
 
-        public get variant(): PIXI.TextStyleFontVariant {
+        public get variant(): string {
             return this.$style.fontVariant;
         }
 
-        public set variant(v: PIXI.TextStyleFontVariant) {
+        public set variant(v: string) {
             if (this.$style.fontVariant != v) {
                 this.$style.fontVariant = v;
                 this.render();
@@ -310,7 +302,7 @@ namespace fgui {
         public set italic(value: boolean) {
             let v: string = value === true ? "italic" : "normal";
             if (this.$style.fontStyle != v) {
-                this.$style.fontStyle = v as PIXI.TextStyleFontStyle;
+                this.$style.fontStyle = v;
                 this.render();
             }
         }
@@ -321,7 +313,7 @@ namespace fgui {
 
         public set multipleLine(value: boolean) {
             value = !value;
-            if (this.$singleLine != value) {
+            if(this.$singleLine != value) {
                 this.$singleLine = value;
                 this.render();
             }
@@ -369,12 +361,6 @@ namespace fgui {
                 this.renderNow();
             return this.$textHeight;
         }
-        private $cacheAsBitmap: boolean;
-        public set cacheAsBitmap(v: boolean) {
-            this.$cacheAsBitmap = v;
-        }
-
-        public get cacheAsBitmap() { return this.$cacheAsBitmap }
 
         public ensureSizeCorrect(): void {
             if (this.$sizeDirty && this.$requireRender)
@@ -393,7 +379,7 @@ namespace fgui {
             }
         }
 
-        private applyStyle(): void {
+        private applyStyle():void {
             this.$textField.style.stroke = this.$style.stroke;
             this.$textField.style.strokeThickness = this.$style.strokeThickness;
             this.$textField.style.fontStyle = this.$style.fontStyle;
@@ -413,9 +399,6 @@ namespace fgui {
         }
 
         protected renderNow(updateBounds: boolean = true): void {
-            if (this.$cacheAsBitmap) {
-                this.$textField.cacheAsBitmap = false;
-            }
             this.$requireRender = false;
             this.$sizeDirty = false;
 
@@ -425,7 +408,7 @@ namespace fgui {
             }
 
             this.switchBitmapMode(false);
-
+            
             this.applyStyle();
             this.$textField.$updateMinHeight();
             let wordWrap = !this.$widthAutoSize && this.multipleLine;
@@ -434,7 +417,7 @@ namespace fgui {
             this.$textField.style.breakWords = wordWrap;
             this.$textField.text = this.$text;         //trigger t.dirty = true
             this.$fontProperties = PIXI.TextMetrics.measureFont(this.$style.toFontString());
-
+            
             this.$textWidth = Math.ceil(this.$textField.textWidth);
             if (this.$textWidth > 0)
                 this.$textWidth += GTextField.GUTTER_X * 2;   //margin gap
@@ -443,15 +426,16 @@ namespace fgui {
                 this.$textHeight += GTextField.GUTTER_Y * 2;  //margin gap
 
             let w = this.width, h = this.height;
-            if (this.autoSize == AutoSizeType.Shrink)
+            if(this.autoSize == AutoSizeType.Shrink)
                 this.shrinkTextField();
-            else {
+            else
+            {
                 this.$textField.scale.set(1, 1);
                 if (this.$widthAutoSize) {
                     w = this.$textWidth;
                     this.$textField.width = w;
-                }
-
+                }                
+                    
                 if (this.$heightAutoSize) {
                     h = this.$textHeight;
                     if (this.$textField.height != this.$textHeight)
@@ -462,7 +446,7 @@ namespace fgui {
                     if (this.$textHeight > h)
                         this.$textHeight = h;
                 }
-
+                
             }
 
             if (updateBounds) {
@@ -472,10 +456,6 @@ namespace fgui {
             }
 
             this.layoutAlign();
-
-            if (this.$cacheAsBitmap) {
-                this.$textField.cacheAsBitmap = true;
-            }
         }
 
         private renderWithBitmapFont(updateBounds: boolean): void {
@@ -710,7 +690,7 @@ namespace fgui {
                         bm.y = line.y + charIndent + Math.ceil(glyph.offsetY * fontScale);
                         bm.texture = glyph.texture;
                         bm.scale.set(fontScale, fontScale);
-                        bm.tint = this.$bitmapFont.colorable === true ? this.$color as number : 0xFFFFFF;
+                        bm.tint = this.$bitmapFont.colorable === true ? this.$color : 0xFFFFFF;
                         this.$btContainer.addChild(bm);
 
                         charX += letterSpacing + Math.ceil(glyph.advance * fontScale);
@@ -752,7 +732,7 @@ namespace fgui {
                     this.$textField.height = this.height;
                 }
                 else {
-                    if (this.$autoSize == AutoSizeType.Shrink)
+                    if(this.$autoSize == AutoSizeType.Shrink)
                         this.shrinkTextField();
                     else {
                         if (!this.$widthAutoSize) {
@@ -770,14 +750,15 @@ namespace fgui {
             this.layoutAlign();
         }
 
-        protected shrinkTextField(): void {
+        protected shrinkTextField():void {
             let fitScale = Math.min(1, this.width / this.$textWidth);
             this.$textField.scale.set(fitScale, fitScale);
         }
 
         protected layoutAlign(): void {
             let tw = this.$textWidth, th = this.$textHeight;
-            if (this.autoSize == AutoSizeType.Shrink) {
+            if(this.autoSize == AutoSizeType.Shrink)
+            {
                 tw *= this.displayObject.scale.x;
                 th *= this.displayObject.scale.y;
             }
@@ -787,12 +768,13 @@ namespace fgui {
                 let dh: number = Math.max(0, this.height - th);
                 if (this.$verticalAlign == VertAlignType.Middle)
                     this.$offset.y = dh * .5;
-                else if (this.$verticalAlign == VertAlignType.Bottom)
+                else if(this.$verticalAlign == VertAlignType.Bottom)
                     this.$offset.y = dh;
             }
-
+            
             let xPos = 0;
-            switch (this.$style.align) {
+            switch(this.$style.align)
+            {
                 case "center":
                     xPos = (this.width - tw) * .5;
                     break;
@@ -805,7 +787,7 @@ namespace fgui {
             this.updatePosition();
         }
 
-        private updatePosition(): void {
+        private updatePosition():void {
             this.displayObject.position.set(Math.floor(this.x + this.$offset.x), Math.floor(this.y + this.$offset.y));
         }
 
@@ -819,7 +801,7 @@ namespace fgui {
             super.setupBeforeAdd(xml);
 
             let str: string = xml.attributes.font;
-            if (str)
+            if(str)
                 this.font = str;
 
             str = xml.attributes.vAlign;
@@ -837,7 +819,7 @@ namespace fgui {
             str = xml.attributes.fontSize;
             if (str)
                 this.$style.fontSize = parseInt(str);
-
+                
             str = xml.attributes.color;
             if (str)
                 this.color = utils.StringUtil.convertFromHtmlColor(str);
@@ -845,7 +827,7 @@ namespace fgui {
             str = xml.attributes.align;
             if (str)
                 this.align = ParseAlignType(str);
-
+                
             str = xml.attributes.autoSize;
             if (str) {
                 this.autoSize = ParseAutoSizeType(str);

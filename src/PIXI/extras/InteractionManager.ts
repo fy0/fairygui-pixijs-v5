@@ -6,38 +6,41 @@ namespace PIXI.extras {
         public stageScaleX: number = 1;
         public stageScaleY: number = 1;
 
-        public constructor(renderer: PIXI.Renderer, options?: InteractionManagerOptions) {
+        public constructor(renderer: PIXI.Renderer, options?: {
+            autoPreventDefault?: boolean;
+            interactionFrequency?: number;
+            useSystemTicker?: number;
+        }) {
             super(renderer, options);
         }
 
-        public processInteractive(interactionEvent: InteractionEvent, displayObject: DisplayObject, func?: InteractionCallback, hitTest?: boolean) {
-            const hit = this.search.findHit(interactionEvent, displayObject, func, hitTest);
-            const delayedEvents = this.delayedEvents;
+        // 这段不兼容，留做提示
+        // public processInteractive(interactionEvent: InteractionEvent, displayObject: DisplayObject, func?: InteractionCallback, hitTest?: boolean) {
+        //     const hit = this.search.findHit(interactionEvent, displayObject, func, hitTest);
+        //     const delayedEvents = this.delayedEvents;
 
-            if (!delayedEvents.length) {
-                return hit;
-            }
-            // Reset the propagation hint, because we start deeper in the tree again.
-            interactionEvent.stopPropagationHint = false;
-            const delayedLen = delayedEvents.length;
-            this.delayedEvents = [];
+        //     if (!delayedEvents.length) {
+        //         return hit;
+        //     }
+        //     // Reset the propagation hint, because we start deeper in the tree again.
+        //     interactionEvent.stopPropagationHint = false;
+        //     const delayedLen = delayedEvents.length;
+        //     this.delayedEvents = [];
 
-            for (let i = 0; i < delayedLen; i++) {
-                const { displayObject, eventString, eventData } = delayedEvents[i];
+        //     for (let i = 0; i < delayedLen; i++) {
+        //         const { displayObject, eventString, eventData } = delayedEvents[i];
 
-                // When we reach the object we wanted to stop propagating at,
-                // set the propagation hint.
-                if (eventData.stopsPropagatingAt === displayObject) {
-                    eventData.stopPropagationHint = true;
-                }
-                (this as any).dispatchEvent(displayObject, eventString, eventData);
-            }
-            return hit;
-        }
+        //         // When we reach the object we wanted to stop propagating at,
+        //         // set the propagation hint.
+        //         if (eventData.stopsPropagatingAt === displayObject) {
+        //             eventData.stopPropagationHint = true;
+        //         }
+        //         (this as any).dispatchEvent(displayObject, eventString, eventData);
+        //     }
+        //     return hit;
+        // }
 
         public mapPositionToPoint(point: PIXI.Point, x: number, y: number): void {
-            point.set(x, y);
-            if ((globalThis as any).tt) return;
 
             let rect: any = void 0;
             let dom: any = this.interactionDOMElement;
@@ -76,14 +79,13 @@ namespace PIXI.extras {
 
         }
     }
-
-    (PIXI as any).extensions.add({
-        name: 'interaction',
-        type: 'renderer-webgl-plugin', // PIXI.ExtensionType.RendererPlugin,
-        ref: PIXI.extras.InteractionManager,
-    });
-
-    // PIXI.Renderer.registerPlugin("interaction", PIXI.extras.InteractionManager);
+    PIXI.Renderer.registerPlugin("interaction", PIXI.extras.InteractionManager);
+    // 新版写法，现在也不用了
+    // (PIXI as any).extensions.add({
+    //     name: 'interaction',
+    //     type: 'renderer-webgl-plugin', // PIXI.ExtensionType.RendererPlugin,
+    //     ref: PIXI.extras.InteractionManager,
+    // });
 
     // PIXI.InteractionManager=PIXI.extras.InteractionManager;
     // //override

@@ -1,6 +1,7 @@
 window.fgui = {};
 window.fairygui = window.fgui;
-window.__extends = (this && this.__extends) || (function () {
+fgui = {};
+PIXI = PIXI || globalThis.PIXI;window.__extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
@@ -10,41 +11,6 @@ window.__extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 
 (function (fgui) {
     var win = window;
@@ -1170,7 +1136,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return this;
         };
         GObject.prototype.hasListener = function (event, handler) {
-            return this.$displayObject.listeners(event).indexOf(handler) >= 0;
+            if (!handler)
+                return this.$displayObject.listenerCount(event) > 0;
+            else
+                return this.$displayObject.listeners(event).indexOf(handler) >= 0;
         };
         GObject.prototype.emit = function (event) {
             var args = [];
@@ -1392,7 +1361,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         GObject.prototype.constructFromResource = function () {
         };
         GObject.prototype.setupBeforeAdd = function (xml) {
-            var _this = this;
             var str;
             var arr;
             this.$id = xml.attributes.id;
@@ -1437,14 +1405,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             if (xml.attributes.grayed == "true")
                 this.grayed = true;
             this.tooltips = xml.attributes.tooltips;
-            this.customData = xml.attributes.customData;
-            if (xml.children) {
-                var properties = xml.children.filter(function (v) { return v.nodeName == "property"; });
-                properties.forEach(function (v) {
-                    var target = _this[v.attributes.target];
-                    target.text = v.attributes.value;
-                });
-            }
             str = xml.attributes.blend;
             if (str)
                 this.blendMode = str;
@@ -1647,6 +1607,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         this.$children.splice(index, 0, child);
                     this.childStateChanged(child);
                     this.setBoundsChangedFlag();
+                    this.onConstruct();
                 }
                 return child;
             }
@@ -1999,6 +1960,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     return;
                 if (obj instanceof PIXI.Container)
                     obj.interactive = false;
+                if (obj instanceof PIXI.MaskData && obj.maskObject)
+                    obj.maskObject.interactive = false;
                 if (obj instanceof PIXI.Graphics)
                     obj.isMask = true;
                 this.$rootContainer.mask = obj;
@@ -2359,7 +2322,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.appendChildrenList();
             this.setBoundsChangedFlag();
             this.constructFromXML(xml);
-            this.onConstruct();
         };
         GComponent.prototype.appendChildrenList = function () {
             var _this = this;
@@ -2655,7 +2617,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GButton.prototype.constructFromXML = function (xml) {
             _super.prototype.constructFromXML.call(this, xml);
-            xml = xml.getChildNodes("Button")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "Button")[0];
             var str;
             str = xml.attributes.mode;
             if (str)
@@ -2684,7 +2646,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GButton.prototype.setupAfterAdd = function (xml) {
             _super.prototype.setupAfterAdd.call(this, xml);
-            xml = xml.getChildNodes("Button")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "Button")[0];
             if (xml) {
                 var str = void 0;
                 str = xml.attributes.title;
@@ -2710,11 +2672,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     this.$relatedController = this.$parent.getController(str);
                 else
                     this.$relatedController = null;
-                str = xml.attributes.sound;
-                if (str)
-                    this.$clicksound = str;
-                else
-                    this.$clicksound = null;
                 this.$pageOption.id = xml.attributes.page;
                 this.selected = xml.attributes.checked == "true";
             }
@@ -2778,32 +2735,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     this.emit(fgui.StateChangeEvent.CHANGED, this);
                 }
             }
-            if (this.$clicksound) {
-                var packname = this.packageItem.owner.name;
-                var item = fgui.UIPackage.getItemByURL(this.$clicksound);
-                if (item) {
-                    var resource = fgui.utils.AssetLoader.resourcesPool[packname + "@" + item.id];
-                    this.playSound(resource);
-                }
-            }
-        };
-        GButton.prototype.playSound = function (resource) {
-            return __awaiter(this, void 0, void 0, function () {
-                var Sound, sound;
-                return __generator(this, function (_a) {
-                    if (!!PIXI.sound) {
-                        Sound = PIXI.sound.Sound;
-                        if (resource.sound) {
-                            resource.sound.play();
-                        }
-                        else {
-                            sound = Sound.from(resource.data);
-                            sound.play(function (sound) { return sound.destroy(); });
-                        }
-                    }
-                    return [2];
-                });
-            });
         };
         GButton.prototype.dispose = function () {
             fgui.GTimer.inst.remove(this.setState, this);
@@ -2992,7 +2923,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GComboBox.prototype.constructFromXML = function (xml) {
             _super.prototype.constructFromXML.call(this, xml);
-            xml = xml.getChildNodes("ComboBox")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "ComboBox")[0];
             var str;
             this.$buttonController = this.getController("button");
             this.$titleObject = this.getChild("title");
@@ -3034,7 +2965,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         GComboBox.prototype.setupAfterAdd = function (xml) {
             var _this = this;
             _super.prototype.setupAfterAdd.call(this, xml);
-            xml = xml.getChildNodes("ComboBox")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "ComboBox")[0];
             if (xml) {
                 var str_1;
                 str_1 = xml.attributes.titleColor;
@@ -3610,7 +3541,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GLabel.prototype.setupAfterAdd = function (xml) {
             _super.prototype.setupAfterAdd.call(this, xml);
-            var cs = xml.getChildNodes("Label");
+            var cs = fgui.utils.XmlParser.getChildNodes(xml, "Label");
             if (cs && cs.length > 0) {
                 xml = cs[0];
                 var str = void 0;
@@ -6157,13 +6088,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             },
             set: function (value) {
                 this.url = null;
-                if (!this.$content) {
-                    this.$content = new fgui.UIImage(null);
-                    this.$content.$initDisp();
-                    this.$container.addChild(this.$content);
-                }
-                else
-                    this.$container.addChild(this.$content);
                 this.switchToMovieMode(false);
                 if (this.$content instanceof fgui.UIImage)
                     this.$content.texture = value;
@@ -6235,53 +6159,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GLoader.prototype.loadExternal = function () {
             var _this = this;
-            this.$container.removeChildren();
-            if (!this.$content || !(this.$content instanceof fgui.UIImage)) {
-                this.$content = new fgui.UIImage(null);
-                this.$content.$initDisp();
-                this.$container.addChild(this.$content);
-            }
-            else
-                this.$container.addChild(this.$content);
-            this.$content.texture = PIXI.Texture.from(this.$url, { scaleMode: PIXI.SCALE_MODES.LINEAR });
-            this.$content.texture.once("update", function () {
-                if (_this.$content.texture) {
-                    _this.$content.texture.frame = new PIXI.Rectangle(0, 0, _this.$content.texture.baseTexture.width, _this.$content.texture.baseTexture.height);
-                    _this.$contentSourceWidth = _this.$content.texture.width;
-                    _this.$contentSourceHeight = _this.$content.texture.height;
-                    _this.updateLayout();
-                }
-            });
-        };
-        GLoader.prototype.__loadExternal = function () {
-            var _this = this;
-            var texture = PIXI.Texture.from(this.$url, { scaleMode: PIXI.SCALE_MODES.LINEAR });
+            var texture = PIXI.Texture.from(this.$url, true);
             this.$loadingTexture = texture;
-            if (texture.width > 1 && texture.height > 1) {
-                this.$loadResCompleted(texture);
-            }
-            else {
-                texture.once("update", function () {
-                    if (!texture.width || !texture.height)
-                        _this.$loadResCompleted(null);
-                    else
-                        _this.$loadResCompleted(texture);
-                });
-            }
+            texture.once("update", function () {
+                if (!texture.width || !texture.height)
+                    _this.$loadResCompleted(null);
+                else
+                    _this.$loadResCompleted(texture);
+            });
         };
         GLoader.prototype.freeExternal = function (texture) {
             PIXI.Texture.removeFromCache(texture);
             texture.destroy(texture.baseTexture != null);
         };
-        GLoader.prototype.$loadResCompleted = function (texture) {
-            if (texture)
-                this.onExternalLoadSuccess(texture);
+        GLoader.prototype.$loadResCompleted = function (res) {
+            if (res)
+                this.onExternalLoadSuccess(res);
             else {
                 this.onExternalLoadFailed();
-                if (this.$loadingTexture) {
-                    this.$loadingTexture.removeAllListeners();
-                    this.freeExternal(this.$loadingTexture);
-                }
+                this.$loadingTexture.removeAllListeners();
+                this.freeExternal(this.$loadingTexture);
                 this.$loadingTexture = null;
             }
             this.$loadingTexture = null;
@@ -6393,6 +6290,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.clearErrorState();
             if (this.$content && this.$content.parent)
                 this.$container.removeChild(this.$content);
+            if (this.$loadingTexture) {
+                this.$loadingTexture.removeAllListeners();
+                this.freeExternal(this.$loadingTexture);
+                this.$loadingTexture = null;
+            }
             if (this.$contentItem == null && this.$content instanceof fgui.UIImage)
                 this.freeExternal(this.$content.texture);
             this.$content && this.$content.destroy();
@@ -6622,8 +6524,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     .to({ $tweenValue: value }, duration * 1000)
                     .easing(GProgressBar.easeLinear)
                     .start();
-                this.$tweener = createjs.Tween.get(this, { onChange: fgui.utils.Binder.create(this.onUpdateTween, this) })
-                    .to({ $tweenValue: value }, duration * 1000, GProgressBar.easeLinear);
                 return this.$tweener;
             }
             else
@@ -6673,7 +6573,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GProgressBar.prototype.constructFromXML = function (xml) {
             _super.prototype.constructFromXML.call(this, xml);
-            xml = xml.getChildNodes("ProgressBar")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "ProgressBar")[0];
             var str;
             str = xml.attributes.titleType;
             if (str)
@@ -6705,7 +6605,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GProgressBar.prototype.setupAfterAdd = function (xml) {
             _super.prototype.setupAfterAdd.call(this, xml);
-            xml = xml.getChildNodes("ProgressBar")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "ProgressBar")[0];
             if (xml) {
                 this.$value = parseInt(xml.attributes.value) || 0;
                 this.$max = parseInt(xml.attributes.max) || 0;
@@ -6835,16 +6735,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return this.$text;
         };
         Object.defineProperty(GTextField.prototype, "color", {
-            get: function () {
-                return this.getColor();
-            },
-            set: function (value) {
-                this.setColor(value);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(GTextField.prototype, "colors", {
             get: function () {
                 return this.getColor();
             },
@@ -7106,14 +6996,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(GTextField.prototype, "cacheAsBitmap", {
-            get: function () { return this.$cacheAsBitmap; },
-            set: function (v) {
-                this.$cacheAsBitmap = v;
-            },
-            enumerable: true,
-            configurable: true
-        });
         GTextField.prototype.ensureSizeCorrect = function () {
             if (this.$sizeDirty && this.$requireRender)
                 this.renderNow();
@@ -7147,9 +7029,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GTextField.prototype.renderNow = function (updateBounds) {
             if (updateBounds === void 0) { updateBounds = true; }
-            if (this.$cacheAsBitmap) {
-                this.$textField.cacheAsBitmap = false;
-            }
             this.$requireRender = false;
             this.$sizeDirty = false;
             if (this.$bitmapFont != null) {
@@ -7197,9 +7076,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 this.$updatingSize = false;
             }
             this.layoutAlign();
-            if (this.$cacheAsBitmap) {
-                this.$textField.cacheAsBitmap = true;
-            }
         };
         GTextField.prototype.renderWithBitmapFont = function (updateBounds) {
             var _this = this;
@@ -7596,9 +7472,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         Object.defineProperty(GRichTextField.prototype, "textFlow", {
             set: function (flow) {
-                Object.assign(this.$style, flow.style);
                 this.$textFlow = flow;
-                this.text = flow.text;
                 this.render();
             },
             enumerable: true,
@@ -7668,8 +7542,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             configurable: true
         });
         GRoot.prototype.attachTo = function (app, stageOptions) {
-            createjs.Ticker = null;
-            fgui.GTimer.inst.setTicker(PIXI.Ticker.shared);
+            fgui.GTimer.inst.setTicker(app.ticker);
             if (this.$uiStage) {
                 this.$uiStage.off(fgui.DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
                 this.$uiStage.nativeStage.off(fgui.InteractiveEvents.Down, this.$stageDown, this);
@@ -8140,7 +8013,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         });
         GScrollBar.prototype.constructFromXML = function (xml) {
             _super.prototype.constructFromXML.call(this, xml);
-            xml = xml.getChildNodes("ScrollBar")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "ScrollBar")[0];
             if (xml != null)
                 this.$fixedGripSize = xml.attributes.fixedGripSize == "true";
             this.$grip = this.getChild("grip");
@@ -8326,7 +8199,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GSlider.prototype.setupAfterAdd = function (xml) {
             _super.prototype.setupAfterAdd.call(this, xml);
-            xml = xml.getChildNodes("Slider")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "Slider")[0];
             if (xml) {
                 this.$value = parseInt(xml.attributes.value);
                 this.$max = parseInt(xml.attributes.max);
@@ -8335,7 +8208,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GSlider.prototype.constructFromXML = function (xml) {
             _super.prototype.constructFromXML.call(this, xml);
-            xml = xml.getChildNodes("Slider")[0];
+            xml = fgui.utils.XmlParser.getChildNodes(xml, "Slider")[0];
             var str;
             if (xml) {
                 str = xml.attributes.titleType;
@@ -8762,6 +8635,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$enumIdx = 0;
             this.$enumCount = 0;
             this.$curTime = Date.now();
+            this.$startedTime = 0;
             this.$items = [];
             this.$itemPool = [];
         }
@@ -8863,7 +8737,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         GTimer.prototype.tickTween = function () {
-            createjs.Tween.tick(this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS, !this.$ticker.started);
+            this.$startedTime += this.$ticker.deltaTime / PIXI.settings.TARGET_FPMS;
+            TWEEN.update(this.$startedTime, !this.$ticker.started);
         };
         GTimer.prototype.setTicker = function (ticker) {
             if (this.$ticker) {
@@ -9096,12 +8971,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             return _this;
         }
         GearColor.prototype.init = function () {
-            if ("color" in this.$owner) {
-                this.$default = this.$owner.color;
-            }
-            else if ("titleColor" in this.$owner) {
-                this.$default = this.$owner["titleColor"];
-            }
+            this.$default = this.$owner.color;
             this.$storage = {};
         };
         GearColor.prototype.addStatus = function (pageId, value) {
@@ -9116,24 +8986,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         GearColor.prototype.apply = function () {
             this.$owner.$gearLocked = true;
             var data = this.$storage[this.$controller.selectedPageId];
-            var color = data != undefined ? Math.floor(data) : Math.floor(this.$default);
-            if ("color" in this.$owner) {
-                this.$owner.color = color;
-            }
-            else if ("titleColor" in this.$owner) {
-                this.$owner["titleColor"] = color;
-            }
+            if (data != undefined)
+                this.$owner.color = Math.floor(data);
+            else
+                this.$owner.color = Math.floor(this.$default);
             this.$owner.$gearLocked = false;
         };
         GearColor.prototype.updateState = function () {
             if (this.$controller == null || this.$owner.$gearLocked || this.$owner.$inProgressBuilding)
                 return;
-            if ("color" in this.$owner) {
-                this.$storage[this.$controller.selectedPageId] = this.$owner.color;
-            }
-            else if ("titleColor" in this.$owner) {
-                this.$storage[this.$controller.selectedPageId] = this.$owner["titleColor"];
-            }
+            this.$storage[this.$controller.selectedPageId] = this.$owner.color;
         };
         return GearColor;
     }(fgui.GearBase));
@@ -9284,10 +9146,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .onUpdate(vars.onChange)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ x: gv.alpha, y: gv.rotation }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -9406,10 +9264,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .onUpdate(vars.onChange)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ width: gv.width, height: gv.height, scaleX: gv.scaleX, scaleY: gv.scaleY }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -9563,10 +9417,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         .easing(this.$easeType)
                         .onComplete(this.tweenComplete)
                         .start();
-                    this.$tweener = createjs.Tween.get(this.$tweenValue, vars)
-                        .wait(this.$tweenDelay * 1000)
-                        .to({ x: pt.x, y: pt.y }, this.$tweenTime * 1000, this.$easeType)
-                        .call(this.tweenComplete, null, this);
                 }
             }
             else {
@@ -9619,7 +9469,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 
 (function (fgui) {
     fgui.isColorGear = function (obj) {
-        return obj && ("color" in obj || "titleColor" in obj);
+        return obj && "color" in obj;
     };
 })(fgui || (fgui = {}));
 
@@ -11334,7 +11184,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$lastMoveTime = fgui.GTimer.inst.curTime / 1000;
             fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Move, this.$mouseMove, this);
             fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Up, this.$mouseUp, this);
-            fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
             fgui.GRoot.inst.nativeStage.on(fgui.InteractiveEvents.Click, this.$click, this);
         };
         ScrollPane.prototype.$mouseMove = function () {
@@ -11350,14 +11199,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 if (!this.$isHoldAreaDone) {
                     ScrollPane.$gestureFlag |= 1;
                     diff = Math.abs(this.$beginTouchPos.y - globalMouse.y);
-                    if (diff < sensitivity) {
+                    if (diff < sensitivity)
                         return;
-                    }
                     if ((ScrollPane.$gestureFlag & 2) != 0) {
                         diff2 = Math.abs(this.$beginTouchPos.x - globalMouse.x);
-                        if (diff < diff2) {
+                        if (diff < diff2)
                             return;
-                        }
                     }
                 }
                 sv = true;
@@ -11430,7 +11277,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                 else
                     this.$container.x = newPosX;
             }
-            var frameRate = PIXI.Ticker.shared.FPS;
+            var frameRate = fgui.GRoot.inst.applicationContext.ticker.FPS;
             var now = fgui.GTimer.inst.curTime / 1000;
             var deltaTime = Math.max(now - this.$lastMoveTime, 1 / frameRate);
             var deltaPositionX = globalMouse.x - this.$lastTouchPos.x;
@@ -11482,7 +11329,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         ScrollPane.prototype.$mouseUp = function () {
             fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Move, this.$mouseMove, this);
-            fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.UpOutside, this.$mouseUp, this);
             fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Up, this.$mouseUp, this);
             fgui.GRoot.inst.nativeStage.off(fgui.InteractiveEvents.Click, this.$click, this);
             if (ScrollPane.draggingPane == this)
@@ -11545,7 +11391,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
             else {
                 if (!this.$inertiaDisabled) {
-                    var frameRate = PIXI.Ticker.shared.FPS;
+                    var frameRate = fgui.GRoot.inst.applicationContext.ticker.FPS;
                     var elapsed = (fgui.GTimer.inst.curTime / 1000 - this.$lastMoveTime) * frameRate - 1;
                     if (elapsed > 1) {
                         var factor = Math.pow(0.833, elapsed);
@@ -11776,12 +11622,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             else if (pos < -this.$overlapSize[axis])
                 pos = -this.$overlapSize[axis];
             else {
-                var isMobile = PIXI.utils.isMobile.any;
                 var v2 = Math.abs(v) * this.$velocityScale;
-                if (isMobile)
+                if (PIXI.utils.isMobile.any)
                     v2 *= Math.max(fgui.GRoot.inst.stageWrapper.designWidth, fgui.GRoot.inst.stageWrapper.designHeight) / Math.max(fgui.GRoot.inst.stageWidth, fgui.GRoot.inst.stageHeight);
                 var ratio = 0;
-                if (this.$pageMode || !isMobile) {
+                if (this.$pageMode || !PIXI.utils.isMobile.any) {
                     if (v2 > 500)
                         ratio = Math.pow((v2 - 500) / 500, 2);
                 }
@@ -12304,7 +12149,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () {
                             _this.$delayCall(item);
                         }).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall, [item], _this);
                     }
                     else
                         _this.startTween(item);
@@ -12320,7 +12164,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         _this.$totalTasks++;
                         item.completed = false;
                         item.tweener = new TWEEN.Tween(item.value).delay(startTime * 1000).onComplete(function () { return _this.$delayCall2(item); }).start();
-                        item.tweener = createjs.Tween.get(item.value).wait(startTime * 1000).call(_this.$delayCall2, [item], _this);
                     }
                 }
             }, this);
@@ -12399,7 +12242,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         Transition.prototype.startTween = function (item) {
-            var _this = this;
             var toProps = new TransitionValue();
             this.prepareValue(item, toProps, this.$reversed);
             this.applyValue(item, item.value);
@@ -12413,14 +12255,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$totalTasks++;
             item.completed = false;
             this.prepareValue(item, toProps, this.$reversed);
-            item.tweener = new TWEEN.Tween(item.value).onUpdate(function () {
-                fgui.utils.Binder.create(_this.$tweenUpdate, _this, item);
-            }).onComplete(function () { return completeHandler(item.tweener); }).to(toProps, item.duration * 1000)
+            var onUpdate = fgui.utils.Binder.create(this.$tweenUpdate, this, item);
+            item.tweener = new TWEEN.Tween(item.value)
+                .onUpdate(function () {
+                onUpdate(null);
+            }).to(toProps, item.duration * 1000)
+                .onComplete(function () { return completeHandler(item.tweener); })
                 .easing(item.easeType)
                 .start();
-            item.tweener = createjs.Tween.get(item.value, {
-                onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
-            }).to(toProps, item.duration * 1000, item.easeType).call(completeHandler);
             if (item.hook != null)
                 item.hook.call(item.hookObj);
         };
@@ -12465,13 +12307,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                     reversed = this.$reversed;
                 this.prepareValue(item, toProps, reversed);
                 this.disposeTween(item);
-                item.tweener = new TWEEN.Tween(item.value).onUpdate(function () { return fgui.utils.Binder.create(_this.$tweenUpdate, _this, item); })
-                    .onComplete(function () { return _this.$tweenRepeatComplete(null, item); }).to(toProps, item.duration * 1000)
+                var onUpdate_1 = fgui.utils.Binder.create(this.$tweenUpdate, this, item);
+                item.tweener = new TWEEN.Tween(item.value).onUpdate(function () {
+                    onUpdate_1(null);
+                })
+                    .to(toProps, item.duration * 1000)
                     .easing(item.easeType)
+                    .delay(0)
+                    .onComplete(function () { _this.$tweenRepeatComplete(null, item); })
                     .start();
-                item.tweener = createjs.Tween.get(item.value, {
-                    onChange: fgui.utils.Binder.create(this.$tweenUpdate, this, item)
-                }).to(toProps, item.duration * 1000, item.easeType).call(this.$tweenRepeatComplete, [null, item], this);
             }
             else
                 this.$tweenComplete(null, item);
@@ -13165,24 +13009,6 @@ var PIXI;
                 _this.stageScaleY = 1;
                 return _this;
             }
-            InteractionManager.prototype.processInteractive = function (interactionEvent, displayObject, func, hitTest) {
-                var hit = this.search.findHit(interactionEvent, displayObject, func, hitTest);
-                var delayedEvents = this.delayedEvents;
-                if (!delayedEvents.length) {
-                    return hit;
-                }
-                interactionEvent.stopPropagationHint = false;
-                var delayedLen = delayedEvents.length;
-                this.delayedEvents = [];
-                for (var i = 0; i < delayedLen; i++) {
-                    var _a = delayedEvents[i], displayObject_1 = _a.displayObject, eventString = _a.eventString, eventData = _a.eventData;
-                    if (eventData.stopsPropagatingAt === displayObject_1) {
-                        eventData.stopPropagationHint = true;
-                    }
-                    this.dispatchEvent(displayObject_1, eventString, eventData);
-                }
-                return hit;
-            };
             InteractionManager.prototype.mapPositionToPoint = function (point, x, y) {
                 var rect = void 0;
                 var dom = this.interactionDOMElement;
@@ -13215,11 +13041,130 @@ var PIXI;
             return InteractionManager;
         }(PIXI.InteractionManager));
         extras.InteractionManager = InteractionManager;
-        PIXI.extensions.add({
-            name: 'interaction',
-            type: 'renderer-webgl-plugin',
-            ref: PIXI.extras.InteractionManager,
-        });
+        PIXI.Renderer.registerPlugin("interaction", PIXI.extras.InteractionManager);
+    })(extras = PIXI.extras || (PIXI.extras = {}));
+})(PIXI || (PIXI = {}));
+var PIXI;
+(function (PIXI) {
+    var extras;
+    (function (extras) {
+        var NTilingSprite = (function (_super) {
+            __extends(NTilingSprite, _super);
+            function NTilingSprite(frameId, tex) {
+                var _this = _super.call(this, tex) || this;
+                _this.$flipX = false;
+                _this.$flipY = false;
+                _this.$frameId = frameId;
+                return _this;
+            }
+            Object.defineProperty(NTilingSprite.prototype, "flipX", {
+                get: function () {
+                    return this.$flipX;
+                },
+                set: function (v) {
+                    if (this.$flipX != v) {
+                        this.$flipX = v;
+                        fgui.GTimer.inst.callLater(this.updateUvs, this);
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(NTilingSprite.prototype, "flipY", {
+                get: function () {
+                    return this.$flipY;
+                },
+                set: function (v) {
+                    if (this.$flipY != v) {
+                        this.$flipY = v;
+                        fgui.GTimer.inst.callLater(this.updateUvs, this);
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
+            NTilingSprite.prototype.combineCacheId = function (flipx, flipy) {
+                if (!this.$frameId || this.$frameId == "")
+                    return null;
+                return "" + this.$frameId + (flipx ? '_fx' : '') + (flipy ? '_fy' : '');
+            };
+            NTilingSprite.prototype.getTextureFromCache = function (flipx, flipy) {
+                var cachedid = this.combineCacheId(flipx, flipy);
+                if (cachedid == null)
+                    return this.texture;
+                var ret = NTilingSprite.$cachedTexturePool[cachedid];
+                if (!ret) {
+                    ret = {
+                        refCount: 1,
+                        texture: this.createFlippedTexture(this.texture, flipx, flipy)
+                    };
+                    NTilingSprite.$cachedTexturePool[cachedid] = ret;
+                }
+                else
+                    ret.refCount++;
+                return ret.texture;
+            };
+            NTilingSprite.prototype.tryRemoveTextureCache = function (flipx, flipy) {
+                var cachedid = this.combineCacheId(flipx, flipy);
+                if (!cachedid)
+                    return false;
+                var ret = NTilingSprite.$cachedTexturePool[cachedid];
+                if (ret) {
+                    ret.refCount--;
+                    if (ret.refCount <= 0) {
+                        ret.texture.destroy();
+                        delete NTilingSprite.$cachedTexturePool[cachedid];
+                    }
+                    return true;
+                }
+                return false;
+            };
+            NTilingSprite.prototype.createFlippedTexture = function (origTexture, flipx, flipy) {
+                var newTex = origTexture.clone();
+                var uvs = newTex["_uvs"];
+                if (this.$flipX) {
+                    var tx0 = uvs.x0;
+                    var tx3 = uvs.x3;
+                    uvs.x0 = uvs.x1;
+                    uvs.x1 = tx0;
+                    uvs.x3 = uvs.x2;
+                    uvs.x2 = tx3;
+                }
+                if (this.$flipY) {
+                    var ty0 = uvs.y0;
+                    var ty1 = uvs.y1;
+                    uvs.y0 = uvs.y3;
+                    uvs.y3 = ty0;
+                    uvs.y1 = uvs.y2;
+                    uvs.y2 = ty1;
+                }
+                uvs.uvsFloat32[0] = uvs.x0;
+                uvs.uvsFloat32[1] = uvs.y0;
+                uvs.uvsFloat32[2] = uvs.x1;
+                uvs.uvsFloat32[3] = uvs.y1;
+                uvs.uvsFloat32[4] = uvs.x2;
+                uvs.uvsFloat32[5] = uvs.y2;
+                uvs.uvsFloat32[6] = uvs.x3;
+                uvs.uvsFloat32[7] = uvs.y3;
+                return newTex;
+            };
+            NTilingSprite.prototype.updateUvs = function () {
+                if (!this.texture)
+                    return;
+                if (this.$flipX || this.$flipY) {
+                    var cachedTex = this.getTextureFromCache(this.$flipX, this.$flipY);
+                    if (this.texture != cachedTex)
+                        this.texture = cachedTex;
+                }
+            };
+            NTilingSprite.prototype.destroy = function (options) {
+                this.tryRemoveTextureCache(this.$flipX, this.$flipY);
+                _super.prototype.destroy.call(this, options);
+            };
+            NTilingSprite.$cachedTexturePool = {};
+            return NTilingSprite;
+        }(PIXI.TilingSprite));
+        extras.NTilingSprite = NTilingSprite;
     })(extras = PIXI.extras || (PIXI.extras = {}));
 })(PIXI || (PIXI = {}));
 var PIXI;
@@ -13435,10 +13380,14 @@ var PIXI;
                     uvs.y1 = uvs.y2;
                     uvs.y2 = ty1;
                 }
-                uvs.uvsFloat32[0] = (uvs.y0 * 65535 & 0xFFFF) << 16 | uvs.x0 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[1] = (uvs.y1 * 65535 & 0xFFFF) << 16 | uvs.x1 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[2] = (uvs.y2 * 65535 & 0xFFFF) << 16 | uvs.x2 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[3] = (uvs.y3 * 65535 & 0xFFFF) << 16 | uvs.x3 * 65535 & 0xFFFF;
+                uvs.uvsFloat32[0] = uvs.x0;
+                uvs.uvsFloat32[1] = uvs.y0;
+                uvs.uvsFloat32[2] = uvs.x1;
+                uvs.uvsFloat32[3] = uvs.y1;
+                uvs.uvsFloat32[4] = uvs.x2;
+                uvs.uvsFloat32[5] = uvs.y2;
+                uvs.uvsFloat32[6] = uvs.x3;
+                uvs.uvsFloat32[7] = uvs.y3;
                 return newTex;
             };
             Sprite.prototype.updateUvs = function () {
@@ -13458,125 +13407,6 @@ var PIXI;
             return Sprite;
         }(PIXI.Sprite));
         extras.Sprite = Sprite;
-    })(extras = PIXI.extras || (PIXI.extras = {}));
-})(PIXI || (PIXI = {}));
-var PIXI;
-(function (PIXI) {
-    var extras;
-    (function (extras) {
-        var TilingSprite = (function (_super) {
-            __extends(TilingSprite, _super);
-            function TilingSprite(frameId, tex) {
-                var _this = _super.call(this, tex) || this;
-                _this.$flipX = false;
-                _this.$flipY = false;
-                _this.$frameId = frameId;
-                return _this;
-            }
-            Object.defineProperty(TilingSprite.prototype, "flipX", {
-                get: function () {
-                    return this.$flipX;
-                },
-                set: function (v) {
-                    if (this.$flipX != v) {
-                        this.$flipX = v;
-                        fgui.GTimer.inst.callLater(this.updateUvs, this);
-                    }
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(TilingSprite.prototype, "flipY", {
-                get: function () {
-                    return this.$flipY;
-                },
-                set: function (v) {
-                    if (this.$flipY != v) {
-                        this.$flipY = v;
-                        fgui.GTimer.inst.callLater(this.updateUvs, this);
-                    }
-                },
-                enumerable: true,
-                configurable: true
-            });
-            TilingSprite.prototype.combineCacheId = function (flipx, flipy) {
-                if (!this.$frameId || this.$frameId == "")
-                    return null;
-                return "" + this.$frameId + (flipx ? '_fx' : '') + (flipy ? '_fy' : '');
-            };
-            TilingSprite.prototype.getTextureFromCache = function (flipx, flipy) {
-                var cachedid = this.combineCacheId(flipx, flipy);
-                if (cachedid == null)
-                    return this.texture;
-                var ret = TilingSprite.$cachedTexturePool[cachedid];
-                if (!ret) {
-                    ret = {
-                        refCount: 1,
-                        texture: this.createFlippedTexture(this.texture, flipx, flipy)
-                    };
-                    TilingSprite.$cachedTexturePool[cachedid] = ret;
-                }
-                else
-                    ret.refCount++;
-                return ret.texture;
-            };
-            TilingSprite.prototype.tryRemoveTextureCache = function (flipx, flipy) {
-                var cachedid = this.combineCacheId(flipx, flipy);
-                if (!cachedid)
-                    return false;
-                var ret = TilingSprite.$cachedTexturePool[cachedid];
-                if (ret) {
-                    ret.refCount--;
-                    if (ret.refCount <= 0) {
-                        ret.texture.destroy();
-                        delete TilingSprite.$cachedTexturePool[cachedid];
-                    }
-                    return true;
-                }
-                return false;
-            };
-            TilingSprite.prototype.createFlippedTexture = function (origTexture, flipx, flipy) {
-                var newTex = origTexture.clone();
-                var uvs = newTex["_uvs"];
-                if (this.$flipX) {
-                    var tx0 = uvs.x0;
-                    var tx3 = uvs.x3;
-                    uvs.x0 = uvs.x1;
-                    uvs.x1 = tx0;
-                    uvs.x3 = uvs.x2;
-                    uvs.x2 = tx3;
-                }
-                if (this.$flipY) {
-                    var ty0 = uvs.y0;
-                    var ty1 = uvs.y1;
-                    uvs.y0 = uvs.y3;
-                    uvs.y3 = ty0;
-                    uvs.y1 = uvs.y2;
-                    uvs.y2 = ty1;
-                }
-                uvs.uvsFloat32[0] = (uvs.y0 * 65535 & 0xFFFF) << 16 | uvs.x0 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[1] = (uvs.y1 * 65535 & 0xFFFF) << 16 | uvs.x1 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[2] = (uvs.y2 * 65535 & 0xFFFF) << 16 | uvs.x2 * 65535 & 0xFFFF;
-                uvs.uvsFloat32[3] = (uvs.y3 * 65535 & 0xFFFF) << 16 | uvs.x3 * 65535 & 0xFFFF;
-                return newTex;
-            };
-            TilingSprite.prototype.updateUvs = function () {
-                if (!this.texture)
-                    return;
-                if (this.$flipX || this.$flipY) {
-                    var cachedTex = this.getTextureFromCache(this.$flipX, this.$flipY);
-                    if (this.texture != cachedTex)
-                        this.texture = cachedTex;
-                }
-            };
-            TilingSprite.prototype.destroy = function (options) {
-                this.tryRemoveTextureCache(this.$flipX, this.$flipY);
-                _super.prototype.destroy.call(this, options);
-            };
-            TilingSprite.$cachedTexturePool = {};
-            return TilingSprite;
-        }(PIXI.TilingSprite));
-        extras.TilingSprite = TilingSprite;
     })(extras = PIXI.extras || (PIXI.extras = {}));
 })(PIXI || (PIXI = {}));
 
@@ -14016,12 +13846,12 @@ var PIXI;
                 this.nodeName = ele.nodeName;
                 this.context = ele;
                 this.type = ele.nodeType;
-                this.text = (this.type == Node.COMMENT_NODE || this.type == Node.TEXT_NODE || this.type == Node.ELEMENT_NODE) ? this.context.textContent : null;
+                this.text = (this.type == Node.COMMENT_NODE || this.type == Node.TEXT_NODE) ? this.context.textContent : null;
             }
             Object.defineProperty(XmlNode.prototype, "children", {
                 get: function () {
                     if (!this.$children)
-                        this.$children = this.__parseChildNodes(this);
+                        this.$children = XmlParser.getChildNodes(this);
                     return this.$children;
                 },
                 enumerable: true,
@@ -14030,58 +13860,12 @@ var PIXI;
             Object.defineProperty(XmlNode.prototype, "attributes", {
                 get: function () {
                     if (!this.$attributes)
-                        this.$attributes = this.__parseNodeAttributes(this);
+                        this.$attributes = XmlParser.getNodeAttributes(this);
                     return this.$attributes;
                 },
                 enumerable: true,
                 configurable: true
             });
-            XmlNode.prototype.getChildNodes = function (matchName) {
-                if (matchName === void 0) { matchName = null; }
-                var nodes = this.children;
-                var ret = [];
-                if (!nodes || nodes.length <= 0)
-                    return ret;
-                var len = nodes.length;
-                for (var i = 0; i < len; i++) {
-                    var n = nodes[i];
-                    if (n.type == Node.TEXT_NODE) {
-                        continue;
-                    }
-                    if (!matchName || (matchName && matchName.length > 0 && n.nodeName.toLowerCase() == matchName.toLowerCase()))
-                        ret.push(n);
-                }
-                return ret;
-            };
-            XmlNode.prototype.__parseChildNodes = function (xml, matchName) {
-                if (matchName === void 0) { matchName = null; }
-                var nodes = xml.context.childNodes;
-                var ret = [];
-                if (!nodes || nodes.length <= 0)
-                    return ret;
-                var len = nodes.length;
-                for (var i = 0; i < len; i++) {
-                    var n = nodes.item(i);
-                    if (n.nodeType == Node.TEXT_NODE) {
-                        continue;
-                    }
-                    if (!matchName || (matchName && matchName.length > 0 && n.nodeName.toLowerCase() == matchName.toLowerCase()))
-                        ret.push(new XmlNode(n));
-                }
-                return ret;
-            };
-            XmlNode.prototype.__parseNodeAttributes = function (xml) {
-                var asList = xml.context.attributes;
-                var ret = {};
-                if (!asList || asList.length <= 0)
-                    return ret;
-                var len = asList.length;
-                for (var i = 0; i < len; i++) {
-                    var a = asList.item(i);
-                    ret[a.nodeName] = a.nodeValue;
-                }
-                return ret;
-            };
             return XmlNode;
         }());
         utils.XmlNode = XmlNode;
@@ -14089,7 +13873,7 @@ var PIXI;
             function XmlParser() {
             }
             XmlParser.tryParse = function (xmlstring, mimeType) {
-                if (mimeType === void 0) { mimeType = "text/xml"; }
+                if (mimeType === void 0) { mimeType = "application/xml"; }
                 var doc = XmlParser.$parser.parseFromString(xmlstring, mimeType);
                 if (doc && doc.childNodes && doc.childNodes.length >= 1)
                     return new XmlNode(doc.firstChild);
@@ -14102,6 +13886,34 @@ var PIXI;
                 while (p.parentNode != null)
                     p = p.parentNode;
                 return p == xml.context ? xml : new XmlNode(p);
+            };
+            XmlParser.getChildNodes = function (xml, matchName) {
+                if (matchName === void 0) { matchName = null; }
+                var nodes = xml.context.childNodes;
+                var ret = [];
+                if (!nodes || nodes.length <= 0)
+                    return ret;
+                var len = nodes.length;
+                for (var i = 0; i < len; i++) {
+                    var n = nodes.item(i);
+                    if (n.nodeType == Node.TEXT_NODE)
+                        continue;
+                    if (!matchName || (matchName && matchName.length > 0 && n.nodeName.toLowerCase() == matchName.toLowerCase()))
+                        ret.push(new XmlNode(n));
+                }
+                return ret;
+            };
+            XmlParser.getNodeAttributes = function (xml) {
+                var asList = xml.context.attributes;
+                var ret = {};
+                if (!asList || asList.length <= 0)
+                    return ret;
+                var len = asList.length;
+                for (var i = 0; i < len; i++) {
+                    var a = asList.item(i);
+                    ret[a.nodeName] = a.nodeValue;
+                }
+                return ret;
             };
             XmlParser.$parser = new DOMParser();
             return XmlParser;
@@ -15055,7 +14867,6 @@ var PIXI;
             _this.$playing = true;
             _this.interactive = _this.interactiveChildren = false;
             _this.$settings = new fgui.DefaultMovieClipSettings();
-            _this.visible;
             _this.on("added", _this.added, _this);
             _this.on("removed", _this.removed, _this);
             return _this;
@@ -15284,7 +15095,7 @@ var PIXI;
             if (item) {
                 item.load();
                 if (item.scaleByTile) {
-                    var ts = new PIXI.extras.TilingSprite(item.id, item.texture);
+                    var ts = new PIXI.extras.NTilingSprite(item.id, item.texture);
                     this.$disp = ts;
                 }
                 else if (item.scale9Grid) {
@@ -15565,7 +15376,6 @@ var PIXI;
             this.alignH = 1;
             this.fallbackWidth = 0;
             this.fallbackHeight = 0;
-            this.initliazeHTMLInput = undefined;
         }
         return DefaultUIStageOptions;
     }());
@@ -15636,31 +15446,29 @@ var PIXI;
             if (!opt.designWidth || !opt.designHeight)
                 throw new Error("Invalid designWidth / designHeight in the parameter 'stageOptions'.");
             _this.$options = opt;
-            if (opt.initliazeHTMLInput == undefined || opt.initliazeHTMLInput) {
-                _this.$appContext.view.style.position = "absolute";
-                var container = _this.$appContext.view.parentElement;
-                var style = container.style;
-                if (container.tagName != "DIV") {
-                    container = document.createElement("DIV");
-                    style.position = "relative";
-                    style.left = style.top = "0px";
-                    style.width = style.height = "100%";
-                    style.overflow = "hidden";
-                    _this.$appContext.view.parentElement.appendChild(container);
-                    container.appendChild(_this.$appContext.view);
-                }
-                var containerPosition = void 0;
-                if (document.defaultView && document.defaultView.getComputedStyle)
-                    containerPosition = document.defaultView.getComputedStyle(container).position;
-                else
-                    containerPosition = style.position;
-                if (containerPosition == "" || containerPosition == "static") {
-                    containerPosition = "relative";
-                    container.style.position = containerPosition;
-                }
-                fgui.HTMLInput.inst.initialize(container, _this.$appContext.view);
-                _this.updateScreenSize();
+            _this.$appContext.view.style.position = "absolute";
+            var container = _this.$appContext.view.parentElement;
+            var style = container.style;
+            if (container.tagName != "DIV") {
+                container = document.createElement("DIV");
+                style.position = "relative";
+                style.left = style.top = "0px";
+                style.width = style.height = "100%";
+                style.overflow = "hidden";
+                _this.$appContext.view.parentElement.appendChild(container);
+                container.appendChild(_this.$appContext.view);
             }
+            var containerPosition;
+            if (document.defaultView && document.defaultView.getComputedStyle)
+                containerPosition = document.defaultView.getComputedStyle(container).position;
+            else
+                containerPosition = style.position;
+            if (containerPosition == "" || containerPosition == "static") {
+                containerPosition = "relative";
+                container.style.position = containerPosition;
+            }
+            fgui.HTMLInput.inst.initialize(container, _this.$appContext.view);
+            _this.updateScreenSize();
             return _this;
         }
         Object.defineProperty(UIStage.prototype, "orientation", {
@@ -15939,13 +15747,13 @@ var PIXI;
         function UITextField(owner) {
             var _this = _super.call(this, "") || this;
             _this.$minHeightID = -1;
-            _this.$width = 0;
-            _this.$height = 0;
+            _this._width = 0;
+            _this._height = 0;
             _this.UIOwner = owner;
             _this.interactive = _this.interactiveChildren = false;
             _this.texture.noFrame = false;
-            _this.$width = _this.texture.frame.width;
-            _this.$height = _this.texture.frame.height;
+            _this._width = _this.texture.frame.width;
+            _this._height = _this.texture.frame.height;
             _this.$minHeight = -1;
             _this.texture.on("update", _this.updateFrame, _this);
             return _this;
@@ -15969,8 +15777,8 @@ var PIXI;
         UITextField.prototype.internalUpdateFrame = function () {
             if (this.texture) {
                 var frm = this.texture.frame;
-                this.$height = Math.max(this.$height, this.$minHeight);
-                var w = frm.x + this.$width, h = frm.y + this.$height;
+                this._height = Math.max(this._height, this.$minHeight);
+                var w = frm.x + this._width, h = frm.y + this._height;
                 if (w > this.texture.baseTexture.width)
                     w = this.texture.baseTexture.width - frm.x;
                 if (h > this.texture.baseTexture.height)
@@ -15991,10 +15799,10 @@ var PIXI;
         };
         Object.defineProperty(UITextField.prototype, "width", {
             get: function () {
-                return this.$width;
+                return this._width;
             },
             set: function (v) {
-                this.$width = v;
+                this._width = v;
                 this.updateFrame();
             },
             enumerable: true,
@@ -16002,10 +15810,10 @@ var PIXI;
         });
         Object.defineProperty(UITextField.prototype, "height", {
             get: function () {
-                return this.$height;
+                return this._height;
             },
             set: function (v) {
-                this.$height = v;
+                this._height = v;
                 this.updateFrame();
             },
             enumerable: true,
@@ -16222,6 +16030,312 @@ var PIXI;
 })(fgui || (fgui = {}));
 
 (function (fgui) {
+    var fflate = (function () {
+        var u8 = Uint8Array;
+        var u16 = Uint16Array;
+        var u32 = Uint32Array;
+        var fleb = new u8([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0]);
+        var fdeb = new u8([0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0]);
+        var clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+        var freb = function (eb, start) {
+            var b = new u16(31);
+            for (var i = 0; i < 31; ++i) {
+                b[i] = start += 1 << eb[i - 1];
+            }
+            var r = new u32(b[30]);
+            for (var i = 1; i < 30; ++i) {
+                for (var j = b[i]; j < b[i + 1]; ++j) {
+                    r[j] = j - b[i] << 5 | i;
+                }
+            }
+            return [b, r];
+        };
+        var _a = freb(fleb, 2);
+        var fl = _a[0];
+        var revfl = _a[1];
+        fl[28] = 258, revfl[258] = 28;
+        var _b = freb(fdeb, 0);
+        var fd = _b[0];
+        var revfd = _b[1];
+        var rev = new u16(32768);
+        for (i = 0; i < 32768; ++i) {
+            x = (i & 43690) >>> 1 | (i & 21845) << 1;
+            x = (x & 52428) >>> 2 | (x & 13107) << 2;
+            x = (x & 61680) >>> 4 | (x & 3855) << 4;
+            rev[i] = ((x & 65280) >>> 8 | (x & 255) << 8) >>> 1;
+        }
+        var x;
+        var i;
+        var hMap = function (cd, mb, r) {
+            var s = cd.length;
+            var i = 0;
+            var l = new u16(mb);
+            for (; i < s; ++i) {
+                if (cd[i])
+                    ++l[cd[i] - 1];
+            }
+            var le = new u16(mb);
+            for (i = 0; i < mb; ++i) {
+                le[i] = le[i - 1] + l[i - 1] << 1;
+            }
+            var co;
+            if (r) {
+                co = new u16(1 << mb);
+                var rvb = 15 - mb;
+                for (i = 0; i < s; ++i) {
+                    if (cd[i]) {
+                        var sv = i << 4 | cd[i];
+                        var r_1 = mb - cd[i];
+                        var v = le[cd[i] - 1]++ << r_1;
+                        for (var m = v | (1 << r_1) - 1; v <= m; ++v) {
+                            co[rev[v] >>> rvb] = sv;
+                        }
+                    }
+                }
+            }
+            else {
+                co = new u16(s);
+                for (i = 0; i < s; ++i) {
+                    if (cd[i]) {
+                        co[i] = rev[le[cd[i] - 1]++] >>> 15 - cd[i];
+                    }
+                }
+            }
+            return co;
+        };
+        var flt = new u8(288);
+        for (i = 0; i < 144; ++i)
+            flt[i] = 8;
+        var i;
+        for (i = 144; i < 256; ++i)
+            flt[i] = 9;
+        var i;
+        for (i = 256; i < 280; ++i)
+            flt[i] = 7;
+        var i;
+        for (i = 280; i < 288; ++i)
+            flt[i] = 8;
+        var i;
+        var fdt = new u8(32);
+        for (i = 0; i < 32; ++i)
+            fdt[i] = 5;
+        var i;
+        var flrm = hMap(flt, 9, 1);
+        var fdrm = hMap(fdt, 5, 1);
+        var max = function (a) {
+            var m = a[0];
+            for (var i = 1; i < a.length; ++i) {
+                if (a[i] > m)
+                    m = a[i];
+            }
+            return m;
+        };
+        var bits = function (d, p, m) {
+            var o = p / 8 | 0;
+            return (d[o] | d[o + 1] << 8) >> (p & 7) & m;
+        };
+        var bits16 = function (d, p) {
+            var o = p / 8 | 0;
+            return (d[o] | d[o + 1] << 8 | d[o + 2] << 16) >> (p & 7);
+        };
+        var shft = function (p) {
+            return (p + 7) / 8 | 0;
+        };
+        var slc = function (v, s, e) {
+            if (s == null || s < 0)
+                s = 0;
+            if (e == null || e > v.length)
+                e = v.length;
+            var n = new (v.BYTES_PER_ELEMENT == 2 ? u16 : v.BYTES_PER_ELEMENT == 4 ? u32 : u8)(e - s);
+            n.set(v.subarray(s, e));
+            return n;
+        };
+        var ec = [
+            "unexpected EOF",
+            "invalid block type",
+            "invalid length/literal",
+            "invalid distance",
+            "stream finished",
+            "no stream handler",
+            ,
+            "no callback",
+            "invalid UTF-8 data",
+            "extra field too long",
+            "date not in range 1980-2099",
+            "filename too long",
+            "stream finishing",
+            "invalid zip data"
+        ];
+        ;
+        var err = function (ind, msg, nt) {
+            var e = new Error(msg || ec[ind]);
+            e.code = ind;
+            if (Error.captureStackTrace)
+                Error.captureStackTrace(e, err);
+            if (!nt)
+                throw e;
+            return e;
+        };
+        var inflt = function (dat, buf, st) {
+            var sl = dat.length;
+            if (!sl || (st && st.f && !st.l))
+                return buf || new u8(0);
+            var noBuf = !buf || st;
+            var noSt = !st || st.i;
+            if (!st)
+                st = {};
+            if (!buf)
+                buf = new u8(sl * 3);
+            var cbuf = function (l) {
+                var bl = buf.length;
+                if (l > bl) {
+                    var nbuf = new u8(Math.max(bl * 2, l));
+                    nbuf.set(buf);
+                    buf = nbuf;
+                }
+            };
+            var final = st.f || 0, pos = st.p || 0, bt = st.b || 0, lm = st.l, dm = st.d, lbt = st.m, dbt = st.n;
+            var tbts = sl * 8;
+            do {
+                if (!lm) {
+                    final = bits(dat, pos, 1);
+                    var type = bits(dat, pos + 1, 3);
+                    pos += 3;
+                    if (!type) {
+                        var s = shft(pos) + 4, l = dat[s - 4] | (dat[s - 3] << 8), t = s + l;
+                        if (t > sl) {
+                            if (noSt)
+                                err(0);
+                            break;
+                        }
+                        if (noBuf)
+                            cbuf(bt + l);
+                        buf.set(dat.subarray(s, t), bt);
+                        st.b = bt += l, st.p = pos = t * 8, st.f = final;
+                        continue;
+                    }
+                    else if (type == 1)
+                        lm = flrm, dm = fdrm, lbt = 9, dbt = 5;
+                    else if (type == 2) {
+                        var hLit = bits(dat, pos, 31) + 257, hcLen = bits(dat, pos + 10, 15) + 4;
+                        var tl = hLit + bits(dat, pos + 5, 31) + 1;
+                        pos += 14;
+                        var ldt = new u8(tl);
+                        var clt = new u8(19);
+                        for (var i_2 = 0; i_2 < hcLen; ++i_2) {
+                            clt[clim[i_2]] = bits(dat, pos + i_2 * 3, 7);
+                        }
+                        pos += hcLen * 3;
+                        var clb = max(clt), clbmsk = (1 << clb) - 1;
+                        var clm = hMap(clt, clb, 1);
+                        for (var i_3 = 0; i_3 < tl;) {
+                            var r = clm[bits(dat, pos, clbmsk)];
+                            pos += r & 15;
+                            var s = r >>> 4;
+                            if (s < 16) {
+                                ldt[i_3++] = s;
+                            }
+                            else {
+                                var c = 0, n = 0;
+                                if (s == 16)
+                                    n = 3 + bits(dat, pos, 3), pos += 2, c = ldt[i_3 - 1];
+                                else if (s == 17)
+                                    n = 3 + bits(dat, pos, 7), pos += 3;
+                                else if (s == 18)
+                                    n = 11 + bits(dat, pos, 127), pos += 7;
+                                while (n--)
+                                    ldt[i_3++] = c;
+                            }
+                        }
+                        var lt = ldt.subarray(0, hLit), dt = ldt.subarray(hLit);
+                        lbt = max(lt);
+                        dbt = max(dt);
+                        lm = hMap(lt, lbt, 1);
+                        dm = hMap(dt, dbt, 1);
+                    }
+                    else
+                        err(1);
+                    if (pos > tbts) {
+                        if (noSt)
+                            err(0);
+                        break;
+                    }
+                }
+                if (noBuf)
+                    cbuf(bt + 131072);
+                var lms = (1 << lbt) - 1, dms = (1 << dbt) - 1;
+                var lpos = pos;
+                for (;; lpos = pos) {
+                    var c = lm[bits16(dat, pos) & lms], sym = c >>> 4;
+                    pos += c & 15;
+                    if (pos > tbts) {
+                        if (noSt)
+                            err(0);
+                        break;
+                    }
+                    if (!c)
+                        err(2);
+                    if (sym < 256)
+                        buf[bt++] = sym;
+                    else if (sym == 256) {
+                        lpos = pos, lm = null;
+                        break;
+                    }
+                    else {
+                        var add = sym - 254;
+                        if (sym > 264) {
+                            var i_4 = sym - 257, b = fleb[i_4];
+                            add = bits(dat, pos, (1 << b) - 1) + fl[i_4];
+                            pos += b;
+                        }
+                        var d = dm[bits16(dat, pos) & dms], dsym = d >>> 4;
+                        if (!d)
+                            err(3);
+                        pos += d & 15;
+                        var dt = fd[dsym];
+                        if (dsym > 3) {
+                            var b = fdeb[dsym];
+                            dt += bits16(dat, pos) & ((1 << b) - 1), pos += b;
+                        }
+                        if (pos > tbts) {
+                            if (noSt)
+                                err(0);
+                            break;
+                        }
+                        if (noBuf)
+                            cbuf(bt + 131072);
+                        var end = bt + add;
+                        for (; bt < end; bt += 4) {
+                            buf[bt] = buf[bt - dt];
+                            buf[bt + 1] = buf[bt + 1 - dt];
+                            buf[bt + 2] = buf[bt + 2 - dt];
+                            buf[bt + 3] = buf[bt + 3 - dt];
+                        }
+                        bt = end;
+                    }
+                }
+                st.l = lm, st.p = lpos, st.b = bt, st.f = final;
+                if (lm)
+                    final = 1, st.m = lbt, st.d = dm, st.n = dbt;
+            } while (!final);
+            return bt == buf.length ? buf : slc(buf, 0, bt);
+        };
+        var et = new u8(0);
+        function inflateSync(data, out) {
+            return inflt(data, out);
+        }
+        var td = typeof TextDecoder != "undefined" && new TextDecoder();
+        var tds = 0;
+        try {
+            td.decode(et, { stream: true });
+            tds = 1;
+        }
+        catch (e) {
+        }
+        return {
+            inflateSync: inflateSync
+        };
+    })();
     var AtlasConfig = (function () {
         function AtlasConfig(atlasName, frame, orig, trim, rotate) {
             this.atlasName = atlasName;
@@ -16320,9 +16434,9 @@ var PIXI;
                     var i = key.indexOf("-");
                     if (i == -1)
                         return;
-                    var text = cxml.text;
-                    var key2 = key.substring(0, i);
-                    var key3 = key.substring(i + 1);
+                    var text = cxml.children.length > 0 ? cxml.children[0].text : "";
+                    var key2 = key.substr(0, i);
+                    var key3 = key.substr(i + 1);
                     var col = UIPackage.$stringsSource[key2];
                     if (!col) {
                         col = {};
@@ -16432,8 +16546,7 @@ var PIXI;
         };
         UIPackage.prototype.decompressPackage = function (buf) {
             this.$resData = {};
-            var inflater = new Zlib.RawInflate(buf);
-            var data = inflater.decompress();
+            var data = fflate.inflateSync(new Uint8Array(buf));
             var source = fgui.utils.RawByte.decodeUTF8(data);
             var curr = 0;
             var fn;
@@ -16607,7 +16720,7 @@ var PIXI;
             }
         };
         UIPackage.prototype.loadComponentChildren = function (item) {
-            var listNode = item.componentData.getChildNodes("displayList");
+            var listNode = fgui.utils.XmlParser.getChildNodes(item.componentData, "displayList");
             if (listNode != null && listNode.length > 0) {
                 item.displayList = [];
                 listNode[0].children.forEach(function (cxml) {
@@ -16664,7 +16777,7 @@ var PIXI;
                     if (value != undefined)
                         cxml.attributes.tooltips = value;
                 }
-                var cs = cxml.getChildNodes("gearText");
+                var cs = fgui.utils.XmlParser.getChildNodes(cxml, "gearText");
                 dxml = cs && cs[0];
                 if (dxml) {
                     value = strings[elementId + "-texts"];
@@ -16692,7 +16805,7 @@ var PIXI;
                     });
                 }
                 else if (ename == "component") {
-                    cs = cxml.getChildNodes("Button");
+                    cs = fgui.utils.XmlParser.getChildNodes(cxml, "Button");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];
@@ -16703,7 +16816,7 @@ var PIXI;
                             dxml.attributes.selectedTitle = value;
                         return;
                     }
-                    cs = cxml.getChildNodes("Label");
+                    cs = fgui.utils.XmlParser.getChildNodes(cxml, "Label");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];
@@ -16711,7 +16824,7 @@ var PIXI;
                             dxml.attributes.title = value;
                         return;
                     }
-                    cs = cxml.getChildNodes("ComboBox");
+                    cs = fgui.utils.XmlParser.getChildNodes(cxml, "ComboBox");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];
@@ -16904,7 +17017,7 @@ var PIXI;
             }
             AssetLoader.prototype._onComplete = function () {
                 AssetLoader.addResources(this.resources);
-                _super.prototype._onComplete.call(this);
+                this.onComplete.dispatch();
             };
             ;
             Object.defineProperty(AssetLoader, "resourcesPool", {

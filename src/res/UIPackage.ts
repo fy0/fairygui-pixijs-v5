@@ -1,4 +1,3 @@
-
 namespace fgui {
     const fflate = (function () {
         // ../node_modules/fflate/esm/browser.js
@@ -530,10 +529,10 @@ namespace fgui {
                     let i: number = key.indexOf("-");
                     if (i == -1) return;
 
-                    // let text: string = cxml.children.length > 0 ? cxml.children[0].text : "";
-                    let text: string = cxml.text;
-                    let key2: string = key.substring(0, i);
-                    let key3: string = key.substring(i + 1);
+                    let text: string = cxml.children.length > 0 ? cxml.children[0].text : "";
+
+                    let key2: string = key.substr(0, i);
+                    let key3: string = key.substr(i + 1);
                     let col: StringSource = UIPackage.$stringsSource[key2];
                     if (!col) {
                         col = {};
@@ -574,7 +573,7 @@ namespace fgui {
             if (!buf)
                 throw new Error(`Resource '${this.$resKey}' not found, please make sure that you use "new fgui.utils.AssetLoader" to load resources instead of " PIXI.loaders.Loader".`);
 
-            if (!buf.data || !(buf.data instanceof ArrayBuffer || (buf as any).data instanceof Uint8Array))
+            if (!buf.data || !(buf.data instanceof ArrayBuffer))
                 throw new Error(`Resource '${this.$resKey}' is not a proper binary resource, please load it as binary format by calling yourLoader.add(name, url, { loadType:PIXI.loaders.Resource.LOAD_TYPE.XHR, xhrType: PIXI.loaders.Resource.XHR_RESPONSE_TYPE.BUFFER })`);
 
             this.decompressPackage(buf.data);
@@ -757,8 +756,8 @@ namespace fgui {
 
         public internalCreateObject(item: PackageItem, userClass: { new(): GObject; } = null): GObject {
             let g: GObject = item.type == PackageItemType.Component && userClass != null ? new userClass() : UIObjectFactory.newObject(item);
-            if (g == null) 
-                return null; 
+            if (g == null)
+                return null;
 
             UIPackage.$constructingObjects++;
             g.packageItem = item;
@@ -862,7 +861,7 @@ namespace fgui {
         }
 
         private loadComponentChildren(item: PackageItem): void {
-            let listNode: utils.XmlNode[] = item.componentData.getChildNodes("displayList");
+            let listNode: utils.XmlNode[] = utils.XmlParser.getChildNodes(item.componentData, "displayList");
             if (listNode != null && listNode.length > 0) {
                 item.displayList = [];
                 listNode[0].children.forEach(cxml => {
@@ -929,7 +928,7 @@ namespace fgui {
                         cxml.attributes.tooltips = value;
                 }
 
-                let cs: utils.XmlNode[] = cxml.getChildNodes("gearText");
+                let cs: utils.XmlNode[] = utils.XmlParser.getChildNodes(cxml, "gearText");
                 dxml = cs && cs[0];
                 if (dxml) {
                     value = strings[`${elementId}-texts`];
@@ -959,7 +958,7 @@ namespace fgui {
                     });
                 }
                 else if (ename == "component") {
-                    cs = cxml.getChildNodes("Button");
+                    cs = utils.XmlParser.getChildNodes(cxml, "Button");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];
@@ -971,7 +970,7 @@ namespace fgui {
                         return;
                     }
 
-                    cs = cxml.getChildNodes("Label");
+                    cs = utils.XmlParser.getChildNodes(cxml, "Label");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];
@@ -980,7 +979,7 @@ namespace fgui {
                         return;
                     }
 
-                    cs = cxml.getChildNodes("ComboBox");
+                    cs = utils.XmlParser.getChildNodes(cxml, "ComboBox");
                     dxml = cs && cs[0];
                     if (dxml) {
                         value = strings[elementId];

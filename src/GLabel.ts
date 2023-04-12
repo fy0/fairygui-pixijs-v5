@@ -85,7 +85,7 @@ namespace fgui {
         public setupAfterAdd(xml: utils.XmlNode): void {
             super.setupAfterAdd(xml);
 
-            let cs = xml.getChildNodes("Label");
+            let cs = utils.XmlParser.getChildNodes(xml, "Label");
             if (cs && cs.length > 0) {
                 xml = cs[0];
 

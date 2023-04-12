@@ -212,7 +212,6 @@ declare namespace fgui {
 }
 declare namespace fgui {
     class GObject {
-        customData: any;
         data: any;
         protected $x: number;
         protected $y: number;
@@ -334,16 +333,16 @@ declare namespace fgui {
         text: string;
         icon: string;
         dispose(): void;
-        click(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
-        onClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
+        click(listener: Function, thisObj?: any): this;
+        onClick(listener: Function, thisObj?: any): this;
         setPosition(x: any, y: number): void;
         onConstruct(): void;
-        removeClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this;
-        hasClick(fn?: PIXI.utils.EventEmitter.ListenerFn): boolean;
-        on(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this;
-        off(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this;
-        once(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this;
-        hasListener(event: string, handler?: PIXI.utils.EventEmitter.ListenerFn): boolean;
+        removeClick(listener: Function, thisObj?: any): this;
+        hasClick(fn?: Function): boolean;
+        on(type: string, listener: Function, thisObject?: any): this;
+        off(type: string, listener: Function, thisObject?: any): this;
+        once(type: string, listener: Function, thisObject?: any): this;
+        hasListener(event: string, handler?: Function): boolean;
         emit(event: string, ...args: any[]): boolean;
         removeAllListeners(type?: string): void;
         draggable: boolean;
@@ -485,7 +484,6 @@ declare namespace fgui {
         private $downEffectValue;
         private $down;
         private $over;
-        private $clicksound;
         static UP: string;
         static DOWN: string;
         static OVER: string;
@@ -507,8 +505,8 @@ declare namespace fgui {
         readonly pageOption: PageOption;
         changeStateOnClick: boolean;
         linkedPopup: GObject;
-        addStateListener(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): void;
-        removeStateListener(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): void;
+        addStateListener(listener: Function, thisObj?: any): void;
+        removeStateListener(listener: Function, thisObj?: any): void;
         fireClick(downEffect?: boolean): void;
         protected setState(val: string): void;
         handleControllerChanged(c: Controller): void;
@@ -520,7 +518,6 @@ declare namespace fgui {
         private $mousedown;
         private $mouseup;
         private $click;
-        private playSound;
         dispose(): void;
     }
 }
@@ -807,7 +804,6 @@ declare namespace fgui {
         private switchToMovieMode;
         private $loadingTexture;
         protected loadExternal(): void;
-        protected __loadExternal(): void;
         protected freeExternal(texture: PIXI.Texture): void;
         private $loadResCompleted;
         protected onExternalLoadSuccess(texture: PIXI.Texture): void;
@@ -892,7 +888,7 @@ declare namespace fgui {
         protected $style: PIXI.TextStyle;
         protected $verticalAlign: VertAlignType;
         protected $offset: PIXI.Point;
-        protected $color: number | number[];
+        protected $color: number;
         protected $singleLine: boolean;
         protected $text: string;
         protected $fontProperties: PIXI.IFontMetrics;
@@ -914,9 +910,8 @@ declare namespace fgui {
         protected setText(value: string): void;
         protected getText(): string;
         color: number;
-        colors: number[];
-        protected getColor(): number | number[];
-        protected setColor(value: number | number[]): void;
+        protected getColor(): number;
+        protected setColor(value: number): void;
         titleColor: number;
         lineHeight: number;
         font: string;
@@ -927,8 +922,8 @@ declare namespace fgui {
         letterSpacing: number;
         underline: boolean;
         bold: boolean;
-        weight: PIXI.TextStyleFontWeight;
-        variant: PIXI.TextStyleFontVariant;
+        weight: string;
+        variant: string;
         italic: boolean;
         multipleLine: boolean;
         stroke: number;
@@ -936,8 +931,6 @@ declare namespace fgui {
         autoSize: AutoSizeType;
         readonly textWidth: number;
         readonly textHeight: number;
-        private $cacheAsBitmap;
-        cacheAsBitmap: boolean;
         ensureSizeCorrect(): void;
         protected render(): void;
         private applyStyle;
@@ -962,11 +955,11 @@ declare namespace fgui {
     }
     class GRichTextField extends GTextField {
         protected $ubbEnabled: boolean;
-        protected $textFlow: TextBlock;
+        protected $textFlow: TextBlock[];
         ubbEnabled: boolean;
         setupBeforeAdd(xml: utils.XmlNode): void;
         constructor();
-        textFlow: TextBlock;
+        textFlow: TextBlock[];
         text: string;
         private $clickLink;
         dispose(): void;
@@ -1734,9 +1727,34 @@ declare namespace PIXI.extras {
         stageRotation: number;
         stageScaleX: number;
         stageScaleY: number;
-        constructor(renderer: PIXI.Renderer, options?: InteractionManagerOptions);
-        processInteractive(interactionEvent: InteractionEvent, displayObject: DisplayObject, func?: InteractionCallback, hitTest?: boolean): void;
+        constructor(renderer: PIXI.Renderer, options?: {
+            autoPreventDefault?: boolean;
+            interactionFrequency?: number;
+            useSystemTicker?: number;
+        });
         mapPositionToPoint(point: PIXI.Point, x: number, y: number): void;
+    }
+}
+declare namespace PIXI.extras {
+    class NTilingSprite extends PIXI.TilingSprite {
+        protected $flipX: boolean;
+        protected $flipY: boolean;
+        protected $frameId: string;
+        protected static $cachedTexturePool: {
+            [key: string]: {
+                refCount: number;
+                texture: PIXI.Texture;
+            };
+        };
+        constructor(frameId?: string, tex?: PIXI.Texture);
+        flipX: boolean;
+        flipY: boolean;
+        private combineCacheId;
+        private getTextureFromCache;
+        private tryRemoveTextureCache;
+        private createFlippedTexture;
+        private updateUvs;
+        destroy(options?: PIXI.destoryOptions): void;
     }
 }
 declare namespace PIXI.extras {
@@ -1769,29 +1787,7 @@ declare namespace PIXI.extras {
         private tryRemoveTextureCache;
         private createFlippedTexture;
         private updateUvs;
-        destroy(options?: PIXI.IDestroyOptions | boolean): void;
-    }
-}
-declare namespace PIXI.extras {
-    class TilingSprite extends PIXI.TilingSprite {
-        protected $flipX: boolean;
-        protected $flipY: boolean;
-        protected $frameId: string;
-        protected static $cachedTexturePool: {
-            [key: string]: {
-                refCount: number;
-                texture: PIXI.Texture;
-            };
-        };
-        constructor(frameId?: string, tex?: PIXI.Texture);
-        flipX: boolean;
-        flipY: boolean;
-        private combineCacheId;
-        private getTextureFromCache;
-        private tryRemoveTextureCache;
-        private createFlippedTexture;
-        private updateUvs;
-        destroy(options?: PIXI.IDestroyOptions | boolean): void;
+        destroy(options?: PIXI.destoryOptions): void;
     }
 }
 declare namespace fgui {
@@ -1908,14 +1904,13 @@ declare namespace fgui.utils {
         constructor(ele: Node);
         readonly children: XmlNode[];
         readonly attributes: AttributeDictionary;
-        getChildNodes(matchName?: string): XmlNode[];
-        private __parseChildNodes;
-        private __parseNodeAttributes;
     }
     class XmlParser {
         private static $parser;
         static tryParse(xmlstring: string, mimeType?: any): XmlNode;
         static getXmlRoot(xml: XmlNode): XmlNode;
+        static getChildNodes(xml: XmlNode, matchName?: string): XmlNode[];
+        static getNodeAttributes(xml: XmlNode): AttributeDictionary;
     }
 }
 declare namespace fgui {
@@ -2171,7 +2166,7 @@ declare namespace fgui {
 declare namespace fgui {
     class UIImage extends PIXI.Container implements IUIObject {
         UIOwner: GObject;
-        protected $disp: PIXI.extras.TilingSprite | PIXI.extras.NineSlicePlane | PIXI.extras.Sprite;
+        protected $disp: PIXI.extras.NTilingSprite | PIXI.extras.NineSlicePlane | PIXI.extras.Sprite;
         constructor(owner?: GObject);
         $initDisp(item?: PackageItem): void;
         tint: number;
@@ -2182,7 +2177,7 @@ declare namespace fgui {
         tiledSlices: number;
         flipX: boolean;
         flipY: boolean;
-        destroy(options?: PIXI.IDestroyOptions | boolean): void;
+        destroy(options?: PIXI.destoryOptions): void;
     }
 }
 declare namespace fgui {
@@ -2244,8 +2239,7 @@ declare namespace fgui {
         alignH?: StageAlign;
         fallbackWidth?: number;
         fallbackHeight?: number;
-        initliazeHTMLInput?: boolean;
-        [key: string]: string | number | boolean;
+        [key: string]: string | number;
     }
     class DefaultUIStageOptions implements UIStageOptions {
         scaleMode?: StageScaleMode;
@@ -2257,8 +2251,7 @@ declare namespace fgui {
         alignH: StageAlign;
         fallbackWidth: number;
         fallbackHeight: number;
-        initliazeHTMLInput: boolean;
-        [key: string]: string | number | boolean;
+        [key: string]: string | number;
     }
     class UIStage extends PIXI.utils.EventEmitter {
         protected $appContext: PIXI.Application;
@@ -2300,8 +2293,8 @@ declare namespace fgui {
         UIOwner: GObject;
         protected $minHeight: number;
         protected $minHeightID: number;
-        protected $width: number;
-        protected $height: number;
+        protected _width: number;
+        protected _height: number;
         constructor(owner?: GObject);
         readonly minHeight: number;
         $updateMinHeight(): void;
@@ -2468,12 +2461,12 @@ declare namespace fgui {
 }
 declare namespace fgui.utils {
     class AssetLoader extends PIXI.Loader {
-        protected static $resources: any;
+        protected static $resources: PIXI.IResourceDictionary;
         constructor(baseUrl?: string, concurrency?: number);
         protected _onComplete(): void;
-        static readonly resourcesPool: any;
+        static readonly resourcesPool: PIXI.IResourceDictionary;
         static destroyResource(key: string): void;
-        static addResources(res: any): void;
+        static addResources(res: PIXI.IResourceDictionary): void;
     }
 }
 declare namespace fgui.utils {

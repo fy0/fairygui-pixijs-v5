@@ -1,7 +1,7 @@
 namespace fgui.utils {
     
         export class AssetLoader extends PIXI.Loader {
-            protected static $resources:any = {};
+            protected static $resources:PIXI.IResourceDictionary = {};
 
             public constructor(baseUrl?:string, concurrency?:number) {
                 super(baseUrl, concurrency);
@@ -9,10 +9,10 @@ namespace fgui.utils {
 
             protected _onComplete():void {
                 AssetLoader.addResources(this.resources);
-                super._onComplete();
+                this.onComplete.dispatch();
             };
 
-            public static get resourcesPool():any {
+            public static get resourcesPool():PIXI.IResourceDictionary {
                 return AssetLoader.$resources;
             }
 
@@ -32,7 +32,7 @@ namespace fgui.utils {
                 }
             }
 
-            public static addResources(res:any):void {
+            public static addResources(res:PIXI.IResourceDictionary):void {
                 if(!res) return;
                 for(let key in res)   //override the item which has same key name
                     AssetLoader.$resources[key] = res[key];

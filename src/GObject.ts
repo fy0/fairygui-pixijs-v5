@@ -3,7 +3,7 @@
 namespace fgui {
 
     export class GObject {
-        public customData:any;
+
         public data: any;
 
         protected $x: number = 0;
@@ -568,13 +568,13 @@ namespace fgui {
                         break;
                     case GearType.Color:
                         if (fgui.isColorGear(this))
-                            gear = new GearColor(this);
+                            gear = new GearColor(this as any);
                         else
                             throw new Error(`Invalid component type to add GearColor feature, please check the component named ${this.$name} in the Editor.`);
                         break;
                     case GearType.Animation:
                         if (fgui.isAnimationGear(this))
-                            gear = new GearAnimation(this);
+                            gear = new GearAnimation(this as any);
                         else
                             throw new Error(`Invalid component type to add GearAnimation feature, please check the component named ${this.$name} in the Editor.`);
                         break;
@@ -737,12 +737,11 @@ namespace fgui {
             this.$displayObject.destroy();
         }
 
-        public click(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this {
+        public click(listener: Function, thisObj?: any): this {
             return this.on(InteractiveEvents.Click, listener, thisObj);
         }
-
         // 和其他平台sdk一致
-        public onClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this {
+        public onClick(listener: Function, thisObj?: any): this {
             return this.on(InteractiveEvents.Click, listener, thisObj);
         }
 
@@ -754,37 +753,37 @@ namespace fgui {
         public onConstruct() {
         }
 
-        public removeClick(listener: PIXI.utils.EventEmitter.ListenerFn, thisObj?: any): this {
+        public removeClick(listener: Function, thisObj?: any): this {
             return this.off(InteractiveEvents.Click, listener, thisObj);
         }
 
-        public hasClick(fn?:PIXI.utils.EventEmitter.ListenerFn): boolean {
+        public hasClick(fn?:Function): boolean {
             return this.hasListener(InteractiveEvents.Click, fn);
         }
 
-        public on(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this {
+        public on(type: string, listener: Function, thisObject?: any): this {
             if (type == null) return this;
             (this.$displayObject as PIXI.utils.EventEmitter).on(type, listener, thisObject);
             return this;
         }
 
-        public off(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this {
+        public off(type: string, listener: Function, thisObject?: any): this {
             if (type == null) return this;
             if (this.$displayObject.listeners(type))
                 (this.$displayObject as PIXI.utils.EventEmitter).off(type, listener, thisObject);
             return this;
         }
 
-        public once(type: string, listener: PIXI.utils.EventEmitter.ListenerFn, thisObject?: any): this {
+        public once(type: string, listener: Function, thisObject?: any): this {
             if (type == null) return this;
             (this.$displayObject as PIXI.utils.EventEmitter).once(type, listener, thisObject);
             return this;
         }
 
-        public hasListener(event: string, handler?:PIXI.utils.EventEmitter.ListenerFn): boolean {   //do we need to also check the context?
-            // if(!handler)
-            //     return this.$displayObject.listeners(event);
-            // else
+        public hasListener(event: string, handler?:Function): boolean {   //do we need to also check the context?
+            if(!handler)
+                return this.$displayObject.listenerCount(event) > 0;
+            else
                 return this.$displayObject.listeners(event).indexOf(handler) >= 0;
         }
 
@@ -1048,16 +1047,7 @@ namespace fgui {
             if (xml.attributes.grayed == "true")
                 this.grayed = true;
             this.tooltips = xml.attributes.tooltips;
-            ////////////////////kevin add...//////////////////////////
-            this.customData = xml.attributes.customData;
-            if(xml.children){
-                let properties=xml.children.filter(v=>v.nodeName=="property");
-                properties.forEach(v=>{
-                    let target=this[v.attributes.target];
-                    target.text=v.attributes.value;
-                });
-            }
-            //////////////////////////////////////////////////////////
+
             str = xml.attributes.blend;
             if (str)
                 this.blendMode = str;

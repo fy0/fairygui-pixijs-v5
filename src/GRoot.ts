@@ -50,7 +50,7 @@ namespace fgui {
         public attachTo(app: PIXI.Application, stageOptions?: UIStageOptions): void {
 
             // createjs.Ticker = null;   //no need this one
-            GTimer.inst.setTicker(PIXI.Ticker.shared);
+            GTimer.inst.setTicker(app.ticker);
             
             if (this.$uiStage) {
                 this.$uiStage.off(DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
@@ -62,6 +62,7 @@ namespace fgui {
             }
 
             this.$uiStage = new UIStage(app, stageOptions);
+            // 可能导致demo无显示，但是不重要，因为引擎中会进行精确的控制
             // this.$uiStage.on(DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
             this.$uiStage.nativeStage.on(InteractiveEvents.Down, this.$stageDown, this);
             this.$uiStage.nativeStage.on(InteractiveEvents.Up, this.$stageUp, this);

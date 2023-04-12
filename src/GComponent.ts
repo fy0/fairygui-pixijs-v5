@@ -11,7 +11,7 @@ namespace fgui {
         protected $trackBounds: boolean;
         protected $boundsChanged: boolean;
         protected $children: GObject[];
-        protected $applyingController: Controller;
+        protected $applyingController:Controller;
 
         /**@internal */
         $buildingDisplayList: boolean;
@@ -57,7 +57,7 @@ namespace fgui {
                 obj.dispose();
             }
             this.$boundsChanged = false;
-            if (this.$scrollPane) this.$scrollPane.dispose();
+            if(this.$scrollPane) this.$scrollPane.dispose();
             super.dispose();
         }
 
@@ -96,6 +96,7 @@ namespace fgui {
 
                     this.childStateChanged(child);
                     this.setBoundsChangedFlag();
+                    this.onConstruct();
                 }
                 return child;
             }
@@ -386,7 +387,7 @@ namespace fgui {
                 }
             });
             if (myIndex < maxIndex) {
-                if (this.$applyingController != null)
+                if(this.$applyingController != null)
                     this.$children[maxIndex].handleControllerChanged(this.$applyingController);  //TODO: twice
                 this.swapChildrenAt(myIndex, maxIndex);
             }
@@ -466,9 +467,9 @@ namespace fgui {
         }
 
         public set mask(obj: PIXI.Container | PIXI.MaskData) {
-            if (!obj) return;
-            if (obj instanceof PIXI.Container) obj.interactive = false;
-            //if(obj instanceof PIXI.MaskData && obj.maskObject) obj.maskObject.interactive=false;
+            if(!obj) return;
+            if(obj instanceof PIXI.Container) obj.interactive=false;
+            if(obj instanceof PIXI.MaskData && obj.maskObject) obj.maskObject.interactive=false;
             // obj.interactive = obj.interactiveChildren = false;
             if (obj instanceof PIXI.Graphics)
                 obj.isMask = true;
@@ -502,8 +503,8 @@ namespace fgui {
             flags: number,
             vtScrollBarRes: string,
             hzScrollBarRes: string,
-            headerRes: string,
-            footerRes: string): void {
+            headerRes:string,
+            footerRes:string): void {
             if (this.$rootContainer == this.$container) {
                 this.$container = new PIXI.Container();
                 this.$rootContainer.addChild(this.$container);
@@ -531,7 +532,7 @@ namespace fgui {
             }
             this.setBoundsChangedFlag();
         }
-
+        
         protected handleSizeChanged(): void {
             if (this.$scrollPane)
                 this.$scrollPane.onOwnerSizeChanged();
@@ -734,6 +735,7 @@ namespace fgui {
 
             let str: string;
             let arr: string[];
+
             str = xml.attributes.size;
             arr = str.split(",");
             this.$sourceWidth = parseInt(arr[0]);
@@ -800,13 +802,13 @@ namespace fgui {
                     hzScrollBarRes = arr[1];
                 }
 
-                let headerRes: string, footerRes: string;
-                str = xml.attributes.ptrRes;
-                if (str) {
-                    arr = str.split(",");
-                    headerRes = arr[0];
-                    footerRes = arr[1];
-                }
+                let headerRes:string, footerRes:string;
+				str = xml.attributes.ptrRes;
+				if(str) {
+					arr = str.split(",");
+					headerRes = arr[0];
+					footerRes = arr[1];
+				}
 
                 this.setupScroll(scrollBarMargin, scroll, scrollBarDisplay, scrollBarFlags, vtScrollBarRes, hzScrollBarRes, headerRes, footerRes);
             }
@@ -885,10 +887,9 @@ namespace fgui {
 
             this.setBoundsChangedFlag();
             this.constructFromXML(xml);
-            this.onConstruct();
         }
 
-        protected appendChildrenList(): void {
+        protected appendChildrenList():void {
             this.$children.forEach(child => {
                 if (child.displayObject != null && child.finalVisible)
                     this.$container.addChild(child.displayObject);
@@ -901,7 +902,7 @@ namespace fgui {
         private $added(d: PIXI.DisplayObject): void {
             this.$transitions.forEach(trans => {
                 if (trans.autoPlay)
-                    trans.play({ times: trans.autoPlayRepeat, delay: trans.autoPlayDelay });
+                    trans.play({ times:trans.autoPlayRepeat, delay:trans.autoPlayDelay });
             });
         }
 

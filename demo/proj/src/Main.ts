@@ -80,6 +80,7 @@ class Main extends PIXI.Application {
         ins.addRelation(fgui.GRoot.inst, fgui.RelationType.Size);
         this.contentlayer.addChild(ins);
         this.initClicks(ins);
+		fgui.GRoot.inst.$winResize(fgui.GRoot.inst.$uiStage);
     }
 
     private renderFunc(index: number, item: fgui.GObject): void {

@@ -33,12 +33,11 @@ namespace fgui {
         resolution?: number;
         designWidth: number;
         designHeight: number;
-        alignV?: StageAlign;
-        alignH?: StageAlign;
-        fallbackWidth?: number;
-        fallbackHeight?: number;
-        initliazeHTMLInput?: boolean;
-        [key: string]: string | number | boolean;
+        alignV?: StageAlign,
+        alignH?: StageAlign,
+        fallbackWidth?: number,
+        fallbackHeight?: number
+        [key: string]: string | number;
     }
 
     export class DefaultUIStageOptions implements UIStageOptions {
@@ -51,10 +50,9 @@ namespace fgui {
         public alignH: StageAlign = StageAlign.CENTER;
         public fallbackWidth: number = 0;
         public fallbackHeight: number = 0;
-        public initliazeHTMLInput: boolean = undefined;
-        [key: string]: string | number | boolean;
+        [key: string]: string | number;
     }
-
+    
     type BoundingRect = {
         x: number,
         y: number,
@@ -63,23 +61,23 @@ namespace fgui {
     };
 
     interface IBoundingRectCalculator {
-        getRect(view: HTMLCanvasElement, fallbackWidth: number, fallbackHeight: number): BoundingRect;
+        getRect(view:HTMLCanvasElement, fallbackWidth:number, fallbackHeight:number):BoundingRect;
     }
 
     class DefaultBoudingRectCalculator implements IBoundingRectCalculator {
-        public getRect(view: HTMLCanvasElement, fallbackWidth: number, fallbackHeight: number): BoundingRect {
+        public getRect(view:HTMLCanvasElement, fallbackWidth:number, fallbackHeight:number): BoundingRect {
             let p = view.parentElement;
-            if (!p)
+            if(!p)
                 //this should be impossible situation unless the user forget to append the view into the DOM.
                 throw new Error("Your view of PIXI are still in memory but not appended to DOM yet? it's necessary that there is a parent element to wrap your view up.");
             let rect = p.getBoundingClientRect();
-            let ret: BoundingRect = {
+            let ret:BoundingRect = {
                 x: 0,
                 y: 0,
                 width: 0,
                 height: 0
             }
-            if (!rect || rect.width <= 0 || rect.height <= 0) {
+            if(!rect || rect.width <= 0 || rect.height <= 0) {
                 console.warn("It seems that you did not set a explicit size for the parent element of your view, now fall back to window size instead.");
                 ret.width = window.innerWidth;
                 ret.height = window.innerHeight;
@@ -94,7 +92,7 @@ namespace fgui {
             }
 
             //consider the worst situation: window does not have size!!
-            if (ret.width <= 0 || ret.height <= 0) {
+            if(ret.width <= 0 || ret.height <= 0) {
                 console.warn("fetch container size to initialize PIXI in all ways have failed, now use default size (fallbackWidth / fallbackHeight) specified in the options instead.");
                 ret.width = fallbackWidth;
                 ret.height = fallbackHeight;
@@ -113,15 +111,15 @@ namespace fgui {
 
         protected $width: number = 0;
         protected $height: number = 0;
-        protected $scaleX: number = 1;
-        protected $scaleY: number = 1;
+        protected $scaleX:number = 1;
+        protected $scaleY:number = 1;
 
         protected $canvasMatrix: PIXI.Matrix = new PIXI.Matrix();
 
         public offsetX: number = 0;
         public offsetY: number = 0;
 
-        private $sizeCalcer: DefaultBoudingRectCalculator = new DefaultBoudingRectCalculator();
+        private $sizeCalcer:DefaultBoudingRectCalculator = new DefaultBoudingRectCalculator();
 
         public constructor(app: PIXI.Application, stageOptions?: UIStageOptions) {
             super();
@@ -132,7 +130,7 @@ namespace fgui {
             // this.$appContext.renderer.autoResize = false;
             this.$appStage = app.stage;
             this.$appStage.interactive = true;
-
+            
             let opt: UIStageOptions;
             if (stageOptions instanceof DefaultUIStageOptions)
                 opt = stageOptions;
@@ -149,35 +147,32 @@ namespace fgui {
                 throw new Error("Invalid designWidth / designHeight in the parameter 'stageOptions'.");
 
             this.$options = opt;
-
-            if(opt.initliazeHTMLInput==undefined||opt.initliazeHTMLInput){
-                this.$appContext.view.style.position = "absolute";
-                let container = this.$appContext.view.parentElement;
-                let style = container.style;
-                //if parent is not a DIV box, make one
-                if (container.tagName != "DIV") {
-                    container = document.createElement("DIV");
-                    style.position = "relative";
-                    style.left = style.top = "0px";
-                    style.width = style.height = "100%";  //and set default full-screen
-                    style.overflow = "hidden";
-                    this.$appContext.view.parentElement.appendChild(container);
-                    container.appendChild(this.$appContext.view);
-                }
-                let containerPosition: string;
-                if (document.defaultView && document.defaultView.getComputedStyle)
-                    containerPosition = document.defaultView.getComputedStyle(container).position;
-                else
-                    containerPosition = style.position;
-                if (containerPosition == "" || containerPosition == "static") {
-                    containerPosition = "relative";
-                    container.style.position = containerPosition;
-                }
-    
-                HTMLInput.inst.initialize(container, this.$appContext.view);
-
-                this.updateScreenSize();
+            
+            this.$appContext.view.style.position = "absolute";
+            let container = this.$appContext.view.parentElement;
+            let style = container.style;
+            //if parent is not a DIV box, make one
+            if(container.tagName != "DIV") {
+                container = document.createElement("DIV");
+                style.position = "relative";
+                style.left = style.top = "0px";
+                style.width = style.height = "100%";  //and set default full-screen
+                style.overflow = "hidden";
+                this.$appContext.view.parentElement.appendChild(container);
+                container.appendChild(this.$appContext.view);
             }
+            let containerPosition:string;
+            if(document.defaultView && document.defaultView.getComputedStyle)
+                containerPosition = document.defaultView.getComputedStyle(container).position;
+            else
+                containerPosition = style.position;
+            if(containerPosition == "" || containerPosition == "static") {
+                containerPosition = "relative";
+                container.style.position = containerPosition;
+            }
+            
+            HTMLInput.inst.initialize(container, this.$appContext.view);
+            this.updateScreenSize();
         }
 
         public get orientation(): StageOrientation {
@@ -209,19 +204,19 @@ namespace fgui {
             this.updateScreenSize();
         }
 
-        public get scaleX(): number {
+        public get scaleX():number{
             return this.$scaleX;
         }
 
-        public get scaleY(): number {
+        public get scaleY():number {
             return this.$scaleY;
         }
 
-        public get designWidth(): number {
+        public get designWidth():number {
             return this.$options.designWidth;
         }
 
-        public get designHeight(): number {
+        public get designHeight():number {
             return this.$options.designHeight;
         }
 
@@ -285,13 +280,13 @@ namespace fgui {
         /**@internal */
         updateScreenSize(): void {
 
-            if (HTMLInput.isTyping) return;
+            if(HTMLInput.isTyping) return;
 
             let canvas = this.$appContext.view;
             let canvasStyle: any = canvas.style;
 
             let rect = this.$sizeCalcer.getRect(canvas, this.$options.fallbackWidth, this.$options.fallbackHeight);
-
+            
             let shouldRotate = false;
             let orientation: string = this.$options.orientation;
             if (orientation != StageOrientation.AUTO) {
@@ -315,7 +310,7 @@ namespace fgui {
             canvasStyle.height = displayHeight + "px";
 
             //kevin add
-            this.$appContext.renderer.resize(stageWidth, stageHeight);
+            this.$appContext.renderer.resize(stageWidth,stageHeight);
 
             let mat = this.$canvasMatrix.identity();
 
@@ -367,14 +362,14 @@ namespace fgui {
 
             this.$scaleX = stageWidth / displayWidth
             this.$scaleY = stageHeight / displayHeight;
-
+            
             let im = this.$appContext.renderer.plugins.interaction as PIXI.extras.InteractionManager;
             im.stageRotation = rotDeg;
             im.stageScaleX = this.$scaleX;
             im.stageScaleY = this.$scaleY;
             this.$appContext.renderer.resize(stageWidth, stageHeight);
             HTMLInput.inst.updateSize(displayWidth / stageWidth, displayHeight / stageHeight);
-
+            
             this.emit(DisplayObjectEvent.SIZE_CHANGED, this);
         }
 
@@ -396,13 +391,14 @@ namespace fgui {
     let UIStageInst: UIStage[] = [];
     let resizeCheckTimer: number = NaN;
 
+    // 由于pixi的resize事件不准确，所以这里改为自己监听resize事件
     // function resizeHandler(): void {
     //     UIStageInst.forEach(stage => {
     //         stage.updateScreenSize();
     //     });
     // }
 
-    // utils.DOMEventManager.inst.on('resize', function () {
+    // utils.DOMEventManager.inst.on('resize', function() {
     //     clearTimeout(resizeCheckTimer);
     //     resizeCheckTimer = window.setTimeout(resizeHandler, 300);
     // });
