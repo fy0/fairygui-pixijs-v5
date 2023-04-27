@@ -53,7 +53,9 @@ namespace PIXI.extras {
             }
 
             let nav: any = navigator;
-            let resolutionMultiplier = nav.isCocoonJS ? this.resolution : 1.0 / this.resolution;
+            // let resolutionMultiplier = nav.isCocoonJS ? this.resolution : 1.0 / this.resolution;
+            // NOTE: 我没有遇到任何问题，所以直接改成1.0，反而是缩放后点击有偏移。微信待测试
+            let resolutionMultiplier = 1.0;
 
             let doc = document.documentElement;
             let left: number = rect.left + window.pageXOffset - doc.clientLeft;
