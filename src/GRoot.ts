@@ -47,11 +47,11 @@ namespace fgui {
          * @param app your PIXI.Application instance to be used in this GRoot instance
          * @param stageOptions stage rotation / resize options
          */
-        public attachTo(app: PIXI.Application, stageOptions?: UIStageOptions): void {
-
+        public attachTo(app: PIXI.Application, stageOptions?: UIStageOptions, ticker?: PIXI.Ticker): void {
             // createjs.Ticker = null;   //no need this one
-            GTimer.inst.setTicker(app.ticker);
-            
+            // 注意，app.ticker 在 update 时会顺便调用渲染，这样就打乱了渲染状态，所以这里优先单独使用一个外部ticker
+            GTimer.inst.setTicker(ticker || app.ticker);
+
             if (this.$uiStage) {
                 this.$uiStage.off(DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
                 this.$uiStage.nativeStage.off(InteractiveEvents.Down, this.$stageDown, this);
