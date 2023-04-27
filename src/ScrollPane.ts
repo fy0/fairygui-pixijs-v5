@@ -1065,8 +1065,13 @@ namespace fgui {
                 this.$isDragging = false;
 
             // NOTE: 根据当前版本修改
-            fgui.GRoot.globalMouseStatus.mouseX = (e as any).clientX
-            fgui.GRoot.globalMouseStatus.mouseY = (e as any).clientY
+            if (e instanceof PIXI.InteractionEvent) {
+                fgui.GRoot.globalMouseStatus.mouseX = e.data.global.x
+                fgui.GRoot.globalMouseStatus.mouseY = e.data.global.y
+            } else {
+                fgui.GRoot.globalMouseStatus.mouseX = (e as any).clientX
+                fgui.GRoot.globalMouseStatus.mouseY = (e as any).clientY
+            }
     
             const globalMouse: PIXI.Point = PIXI.utils.isMobile.any ? 
                 this.$owner.globalToLocal(e.data.global.x, e.data.global.y)

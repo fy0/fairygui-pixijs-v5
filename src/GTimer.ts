@@ -150,8 +150,9 @@ namespace fgui {
             this.$ticker.add(this.advance, this, PIXI.UPDATE_PRIORITY.NORMAL);
             this.$ticker.add(this.tickTween, this, PIXI.UPDATE_PRIORITY.HIGH);
 
-            if(!this.$ticker.started)
-                this.$ticker.start();
+            // NOTE: 这里似乎会多次调用start
+            // if(!this.$ticker.started)
+            //     this.$ticker.start();
         }
     }
 

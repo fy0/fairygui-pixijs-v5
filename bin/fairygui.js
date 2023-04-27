@@ -8815,8 +8815,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.$ticker = ticker;
             this.$ticker.add(this.advance, this, PIXI.UPDATE_PRIORITY.NORMAL);
             this.$ticker.add(this.tickTween, this, PIXI.UPDATE_PRIORITY.HIGH);
-            if (!this.$ticker.started)
-                this.$ticker.start();
         };
         GTimer.inst = new GTimer();
         return GTimer;
@@ -11247,8 +11245,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
             else
                 this.$isDragging = false;
-            fgui.GRoot.globalMouseStatus.mouseX = e.clientX;
-            fgui.GRoot.globalMouseStatus.mouseY = e.clientY;
+            if (e instanceof PIXI.InteractionEvent) {
+                fgui.GRoot.globalMouseStatus.mouseX = e.data.global.x;
+                fgui.GRoot.globalMouseStatus.mouseY = e.data.global.y;
+            }
+            else {
+                fgui.GRoot.globalMouseStatus.mouseX = e.clientX;
+                fgui.GRoot.globalMouseStatus.mouseY = e.clientY;
+            }
             var globalMouse = PIXI.utils.isMobile.any ?
                 this.$owner.globalToLocal(e.data.global.x, e.data.global.y)
                 : this.$owner.globalToLocal(fgui.GRoot.globalMouseStatus.mouseX, fgui.GRoot.globalMouseStatus.mouseY, ScrollPane.sHelperPoint);
