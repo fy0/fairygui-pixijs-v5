@@ -15,6 +15,12 @@ namespace fgui {
         public constructor() {
             this.$items = [];
             this.$itemPool = [];
+
+            // 这是一个对tween.js的魔改，原版没有这个方法
+            // 不然会出现 tween 启动延迟的情况
+            if ((TWEEN as any).setupNow) {
+                (TWEEN as any).setupNow(() => this.$startedTime);
+            }
         }
 
         private getItem(): TimerItem {

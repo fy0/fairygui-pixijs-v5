@@ -8695,12 +8695,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 (function (fgui) {
     var GTimer = (function () {
         function GTimer() {
+            var _this = this;
             this.$enumIdx = 0;
             this.$enumCount = 0;
             this.$curTime = Date.now();
             this.$startedTime = 0;
             this.$items = [];
             this.$itemPool = [];
+            if (TWEEN.setupNow) {
+                TWEEN.setupNow(function () { return _this.$startedTime; });
+            }
         }
         GTimer.prototype.getItem = function () {
             if (this.$itemPool.length)
@@ -15692,6 +15696,8 @@ var PIXI;
         UIStage.prototype.updateScreenSize = function () {
             if (fgui.HTMLInput.isTyping)
                 return;
+            this.emit(fgui.DisplayObjectEvent.SIZE_CHANGED, this);
+            return;
             var canvas = this.$appContext.view;
             var canvasStyle = canvas.style;
             var rect = this.$sizeCalcer.getRect(canvas, this.$options.fallbackWidth, this.$options.fallbackHeight);

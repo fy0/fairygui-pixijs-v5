@@ -170,7 +170,7 @@ namespace fgui {
                 containerPosition = "relative";
                 container.style.position = containerPosition;
             }
-            
+
             HTMLInput.inst.initialize(container, this.$appContext.view);
             this.updateScreenSize();
         }
@@ -279,8 +279,11 @@ namespace fgui {
 
         /**@internal */
         updateScreenSize(): void {
-
             if(HTMLInput.isTyping) return;
+            // NOTE: 需求不大，会破坏原本的resize
+            // HTMLInput.inst.updateSize(displayWidth / stageWidth, displayHeight / stageHeight);
+            this.emit(DisplayObjectEvent.SIZE_CHANGED, this);
+            return;
 
             let canvas = this.$appContext.view;
             let canvasStyle: any = canvas.style;
