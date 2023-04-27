@@ -7604,8 +7604,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             enumerable: true,
             configurable: true
         });
-        GRoot.prototype.attachTo = function (app, stageOptions) {
-            fgui.GTimer.inst.setTicker(app.ticker);
+        GRoot.prototype.attachTo = function (app, stageOptions, ticker) {
+            fgui.GTimer.inst.setTicker(ticker || app.ticker);
             if (this.$uiStage) {
                 this.$uiStage.off(fgui.DisplayObjectEvent.SIZE_CHANGED, this.$winResize, this);
                 this.$uiStage.nativeStage.off(fgui.InteractiveEvents.Down, this.$stageDown, this);
@@ -13115,7 +13115,7 @@ var PIXI;
                     rect = dom.getBoundingClientRect();
                 }
                 var nav = navigator;
-                var resolutionMultiplier = nav.isCocoonJS ? this.resolution : 1.0 / this.resolution;
+                var resolutionMultiplier = 1.0;
                 var doc = document.documentElement;
                 var left = rect.left + window.pageXOffset - doc.clientLeft;
                 var top = rect.top + window.pageYOffset - doc.clientTop;

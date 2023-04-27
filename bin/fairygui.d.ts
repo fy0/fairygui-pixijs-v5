@@ -989,7 +989,7 @@ declare namespace fgui {
         private static $gmStatus;
         static readonly inst: GRoot;
         static readonly globalMouseStatus: GRootMouseStatus;
-        attachTo(app: PIXI.Application, stageOptions?: UIStageOptions): void;
+        attachTo(app: PIXI.Application, stageOptions?: UIStageOptions, ticker?: PIXI.Ticker): void;
         constructor();
         readonly uniqueID: number;
         readonly stageWidth: number;
