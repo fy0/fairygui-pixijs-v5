@@ -96,7 +96,7 @@ namespace fgui {
 
                     this.childStateChanged(child);
                     this.setBoundsChangedFlag();
-                    this.onConstruct();
+                    // this.onConstruct(); // 这个忘了从哪继承来的，但感觉这样子调用不了
                 }
                 return child;
             }
@@ -887,6 +887,7 @@ namespace fgui {
 
             this.setBoundsChangedFlag();
             this.constructFromXML(xml);
+            this.onConstruct();
         }
 
         protected appendChildrenList():void {

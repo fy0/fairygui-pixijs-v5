@@ -261,15 +261,39 @@ namespace fgui {
 
         /**overwrite this method if you need to load resources by your own way*/
         protected loadExternal(): void {
-            let texture = PIXI.Texture.from(this.$url, true);
-            this.$loadingTexture = texture;
-            //TODO: Texture does not have error event... monitor error event on baseTexture will casue cross-error-event problem.
-            texture.once("update", () => {
-                if (!texture.width || !texture.height)
-                    this.$loadResCompleted(null);
-                else
-                    this.$loadResCompleted(texture);
+            this.$container.removeChildren();
+            if (!this.$content || !(this.$content instanceof fgui.UIImage)) {
+                this.$content = new fgui.UIImage(null);
+                this.$content.$initDisp();
+                this.$container.addChild(this.$content);
+            }
+            else
+                this.$container.addChild(this.$content);
+            this.$content.texture = PIXI.Texture.from(this.$url, { scaleMode: PIXI.SCALE_MODES.LINEAR });
+            let updateContent = ()=>{
+                if (this.$content && this.$content.texture) {
+                    this.$content.texture.frame = new PIXI.Rectangle(0, 0, this.$content.texture.baseTexture.width, this.$content.texture.baseTexture.height);
+                    this.$contentSourceWidth = this.$content.texture.width;
+                    this.$contentSourceHeight = this.$content.texture.height;
+                    this.updateLayout();
+                }
+            }
+            this.$content.texture.once("update", () => {
+                updateContent()
             });
+            updateContent()
+            //如果这个图片不是第一次读入，不会触发update
+
+            // 新旧版差别较大，以下是旧版:
+            // let texture = PIXI.Texture.from(this.$url, true);
+            // this.$loadingTexture = texture;
+            // //TODO: Texture does not have error event... monitor error event on baseTexture will casue cross-error-event problem.
+            // texture.once("update", () => {
+            //     if (!texture.width || !texture.height)
+            //         this.$loadResCompleted(null);
+            //     else
+            //         this.$loadResCompleted(texture);
+            // });
         }
 
         /**free the resource you loaded */

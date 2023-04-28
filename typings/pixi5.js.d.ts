@@ -11723,6 +11723,8 @@
          * Resets the event.
          */
         reset(): void;
+
+        public stopPropagationHint: boolean;
     }
     /**
      * The interaction manager deals with mouse, touch and pointer events.

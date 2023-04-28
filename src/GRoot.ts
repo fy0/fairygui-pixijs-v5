@@ -125,6 +125,10 @@ namespace fgui {
             return this.$uiStage;
         }
 
+        public get view() {
+            return this.getChildAt(0);
+        }
+
         protected dispatchMouseWheel(evt:any):void {
             // let childUnderMouse = this.getObjectUnderPoint(GRoot.globalMouseStatus.mouseX, GRoot.globalMouseStatus.mouseY);
             // if(childUnderMouse != null) { //bubble

@@ -709,6 +709,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             set: function (value) {
                 this.$touchable = value;
                 this.$displayObject.interactive = this.$touchable;
+                this.$displayObject.interactiveChildren = this.$touchable;
+                this.$displayObject.ignoreHit = !this.$touchable;
             },
             enumerable: true,
             configurable: true
@@ -1639,7 +1641,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
                         this.$children.splice(index, 0, child);
                     this.childStateChanged(child);
                     this.setBoundsChangedFlag();
-                    this.onConstruct();
                 }
                 return child;
             }
@@ -2354,6 +2355,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             this.appendChildrenList();
             this.setBoundsChangedFlag();
             this.constructFromXML(xml);
+            this.onConstruct();
         };
         GComponent.prototype.appendChildrenList = function () {
             var _this = this;
@@ -6222,14 +6224,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         };
         GLoader.prototype.loadExternal = function () {
             var _this = this;
-            var texture = PIXI.Texture.from(this.$url, true);
-            this.$loadingTexture = texture;
-            texture.once("update", function () {
-                if (!texture.width || !texture.height)
-                    _this.$loadResCompleted(null);
-                else
-                    _this.$loadResCompleted(texture);
+            this.$container.removeChildren();
+            if (!this.$content || !(this.$content instanceof fgui.UIImage)) {
+                this.$content = new fgui.UIImage(null);
+                this.$content.$initDisp();
+                this.$container.addChild(this.$content);
+            }
+            else
+                this.$container.addChild(this.$content);
+            this.$content.texture = PIXI.Texture.from(this.$url, { scaleMode: PIXI.SCALE_MODES.LINEAR });
+            var updateContent = function () {
+                if (_this.$content && _this.$content.texture) {
+                    _this.$content.texture.frame = new PIXI.Rectangle(0, 0, _this.$content.texture.baseTexture.width, _this.$content.texture.baseTexture.height);
+                    _this.$contentSourceWidth = _this.$content.texture.width;
+                    _this.$contentSourceHeight = _this.$content.texture.height;
+                    _this.updateLayout();
+                }
+            };
+            this.$content.texture.once("update", function () {
+                updateContent();
             });
+            updateContent();
         };
         GLoader.prototype.freeExternal = function (texture) {
             PIXI.Texture.removeFromCache(texture);
@@ -7074,6 +7089,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
             }
         };
         GTextField.prototype.applyStyle = function () {
+            if (!this.$style)
+                return;
             this.$textField.style.stroke = this.$style.stroke;
             this.$textField.style.strokeThickness = this.$style.strokeThickness;
             this.$textField.style.fontStyle = this.$style.fontStyle;
@@ -7678,6 +7695,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         Object.defineProperty(GRoot.prototype, "stageWrapper", {
             get: function () {
                 return this.$uiStage;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(GRoot.prototype, "view", {
+            get: function () {
+                return this.getChildAt(0);
             },
             enumerable: true,
             configurable: true
@@ -13109,30 +13133,20 @@ var PIXI;
                 var rect = void 0;
                 var dom = this.interactionDOMElement;
                 if (!dom.parentElement) {
-                    rect = { x: 0, y: 0, width: 0, height: 0 };
+                    rect = {
+                        x: 0, y: 0,
+                        width: dom.width,
+                        height: dom.height,
+                        left: 0,
+                        top: 0
+                    };
                 }
                 else {
                     rect = dom.getBoundingClientRect();
                 }
-                var nav = navigator;
-                var resolutionMultiplier = 1.0;
-                var doc = document.documentElement;
-                var left = rect.left + window.pageXOffset - doc.clientLeft;
-                var top = rect.top + window.pageYOffset - doc.clientTop;
-                x -= left;
-                y -= top;
-                var newx = x, newy = y;
-                if (this.stageRotation == 90) {
-                    newx = y;
-                    newy = rect.width - x;
-                }
-                else if (this.stageRotation == -90) {
-                    newx = rect.height - y;
-                    newy = x;
-                }
-                newx = newx * this.stageScaleX * resolutionMultiplier;
-                newy = newy * this.stageScaleY * resolutionMultiplier;
-                point.set(newx, newy);
+                var resolutionMultiplier = 1 / this.resolution;
+                point.x = (x - rect.left) * (dom.width / rect.width) * resolutionMultiplier;
+                point.y = (y - rect.top) * (dom.height / rect.height) * resolutionMultiplier;
             };
             return InteractionManager;
         }(PIXI.InteractionManager));
@@ -15544,26 +15558,28 @@ var PIXI;
             _this.$options = opt;
             _this.$appContext.view.style.position = "absolute";
             var container = _this.$appContext.view.parentElement;
-            var style = container.style;
-            if (container.tagName != "DIV") {
-                container = document.createElement("DIV");
-                style.position = "relative";
-                style.left = style.top = "0px";
-                style.width = style.height = "100%";
-                style.overflow = "hidden";
-                _this.$appContext.view.parentElement.appendChild(container);
-                container.appendChild(_this.$appContext.view);
+            if (container) {
+                var style = container.style;
+                if (container.tagName != "DIV") {
+                    container = document.createElement("DIV");
+                    style.position = "relative";
+                    style.left = style.top = "0px";
+                    style.width = style.height = "100%";
+                    style.overflow = "hidden";
+                    _this.$appContext.view.parentElement.appendChild(container);
+                    container.appendChild(_this.$appContext.view);
+                }
+                var containerPosition = void 0;
+                if (document.defaultView && document.defaultView.getComputedStyle)
+                    containerPosition = document.defaultView.getComputedStyle(container).position;
+                else
+                    containerPosition = style.position;
+                if (containerPosition == "" || containerPosition == "static") {
+                    containerPosition = "relative";
+                    container.style.position = containerPosition;
+                }
+                fgui.HTMLInput.inst.initialize(container, _this.$appContext.view);
             }
-            var containerPosition;
-            if (document.defaultView && document.defaultView.getComputedStyle)
-                containerPosition = document.defaultView.getComputedStyle(container).position;
-            else
-                containerPosition = style.position;
-            if (containerPosition == "" || containerPosition == "static") {
-                containerPosition = "relative";
-                container.style.position = containerPosition;
-            }
-            fgui.HTMLInput.inst.initialize(container, _this.$appContext.view);
             _this.updateScreenSize();
             return _this;
         }
@@ -15864,7 +15880,7 @@ var PIXI;
             configurable: true
         });
         UITextField.prototype.$updateMinHeight = function () {
-            if (this.style.styleID != this.$minHeightID || this.$minHeight <= 0) {
+            if (this.style && this.style.styleID != this.$minHeightID || this.$minHeight <= 0) {
                 this.$minHeight = PIXI.TextMetrics.measureText("", this.style, false).lineHeight;
                 this.$minHeightID = this.style.styleID;
             }

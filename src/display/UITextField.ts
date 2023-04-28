@@ -88,7 +88,7 @@ namespace fgui {
 
         /**@internal */
         $updateMinHeight():void {
-            if(this.style.styleID != this.$minHeightID || this.$minHeight <= 0) {
+            if (this.style && this.style.styleID != this.$minHeightID || this.$minHeight <= 0) {
                 this.$minHeight = PIXI.TextMetrics.measureText("", this.style, false).lineHeight;  //no way to get the cached auto-lineheight (when style.lineHeight=0);
                 this.$minHeightID = this.style.styleID;
             }

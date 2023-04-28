@@ -999,6 +999,7 @@ declare namespace fgui {
         readonly nativeStage: PIXI.Container;
         readonly orientation: StageOrientation;
         readonly stageWrapper: UIStage;
+        readonly view: GObject;
         protected dispatchMouseWheel(evt: any): void;
         getObjectUnderPoint(globalX: number, globalY: number): GObject;
         showWindow(win: Window): void;
@@ -1726,6 +1727,7 @@ declare namespace fgui {
     }
 }
 declare namespace PIXI.extras {
+    type InteractionCallback = (interactionEvent: InteractionEvent, displayObject: DisplayObject, hit?: boolean) => void;
     class InteractionManager extends PIXI.InteractionManager {
         stageRotation: number;
         stageScaleX: number;
@@ -1735,6 +1737,8 @@ declare namespace PIXI.extras {
             interactionFrequency?: number;
             useSystemTicker?: number;
         });
+        search: any;
+        delayedEvents: any[];
         mapPositionToPoint(point: PIXI.Point, x: number, y: number): void;
     }
 }

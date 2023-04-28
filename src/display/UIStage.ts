@@ -150,28 +150,29 @@ namespace fgui {
             
             this.$appContext.view.style.position = "absolute";
             let container = this.$appContext.view.parentElement;
-            let style = container.style;
-            //if parent is not a DIV box, make one
-            if(container.tagName != "DIV") {
-                container = document.createElement("DIV");
-                style.position = "relative";
-                style.left = style.top = "0px";
-                style.width = style.height = "100%";  //and set default full-screen
-                style.overflow = "hidden";
-                this.$appContext.view.parentElement.appendChild(container);
-                container.appendChild(this.$appContext.view);
+            if (container) {
+                let style = container.style;
+                //if parent is not a DIV box, make one
+                if(container.tagName != "DIV") {
+                    container = document.createElement("DIV");
+                    style.position = "relative";
+                    style.left = style.top = "0px";
+                    style.width = style.height = "100%";  //and set default full-screen
+                    style.overflow = "hidden";
+                    this.$appContext.view.parentElement.appendChild(container);
+                    container.appendChild(this.$appContext.view);
+                }
+                let containerPosition:string;
+                if(document.defaultView && document.defaultView.getComputedStyle)
+                    containerPosition = document.defaultView.getComputedStyle(container).position;
+                else
+                    containerPosition = style.position;
+                if(containerPosition == "" || containerPosition == "static") {
+                    containerPosition = "relative";
+                    container.style.position = containerPosition;
+                }
+                HTMLInput.inst.initialize(container, this.$appContext.view);
             }
-            let containerPosition:string;
-            if(document.defaultView && document.defaultView.getComputedStyle)
-                containerPosition = document.defaultView.getComputedStyle(container).position;
-            else
-                containerPosition = style.position;
-            if(containerPosition == "" || containerPosition == "static") {
-                containerPosition = "relative";
-                container.style.position = containerPosition;
-            }
-
-            HTMLInput.inst.initialize(container, this.$appContext.view);
             this.updateScreenSize();
         }
 

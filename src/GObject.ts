@@ -351,6 +351,8 @@ namespace fgui {
         public set touchable(value: boolean) {
             this.$touchable = value;
             this.$displayObject.interactive = this.$touchable;
+            (this.$displayObject as any).interactiveChildren = this.$touchable;
+            (this.$displayObject as any).ignoreHit = !this.$touchable; // 这个似乎没用
         }
 
         public get grayed(): boolean {

@@ -380,6 +380,7 @@ namespace fgui {
         }
 
         private applyStyle():void {
+            if (!this.$style) return;
             this.$textField.style.stroke = this.$style.stroke;
             this.$textField.style.strokeThickness = this.$style.strokeThickness;
             this.$textField.style.fontStyle = this.$style.fontStyle;
@@ -399,6 +400,9 @@ namespace fgui {
         }
 
         protected renderNow(updateBounds: boolean = true): void {
+            // NOTE: 不知道是不是后来新加的 当前版本没有
+            // if (this.disposed) return;
+
             this.$requireRender = false;
             this.$sizeDirty = false;
 
