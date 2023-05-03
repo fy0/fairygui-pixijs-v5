@@ -13144,7 +13144,7 @@ var PIXI;
                 else {
                     rect = dom.getBoundingClientRect();
                 }
-                var resolutionMultiplier = 1 / this.resolution;
+                var resolutionMultiplier = 1.0;
                 point.x = (x - rect.left) * (dom.width / rect.width) * resolutionMultiplier;
                 point.y = (y - rect.top) * (dom.height / rect.height) * resolutionMultiplier;
             };

@@ -61,7 +61,9 @@ namespace PIXI.extras {
             } else {
                 rect = dom.getBoundingClientRect();
             }
-            const resolutionMultiplier = 1 / this.resolution;
+            // const resolutionMultiplier = 1 / this.resolution;
+            // NOTE: 这里缩放后会在字节平台有偏移，反而1.0在pc和字节都没有问题
+            const resolutionMultiplier = 1.0;
             point.x = (x - rect.left) * (dom.width / rect.width) * resolutionMultiplier;
             point.y = (y - rect.top) * (dom.height / rect.height) * resolutionMultiplier;
         }
